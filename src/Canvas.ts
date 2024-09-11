@@ -1,3 +1,5 @@
+import { TetrisShape } from "./Game";
+import { SQUARE_SIZE } from "./Globals";
 
 export class Canvas {
   public canvas: HTMLCanvasElement
@@ -24,6 +26,31 @@ export class Canvas {
   drawRect(x: number, y: number, width: number, height: number, color: string) {
     this.context.fillStyle = color;
     this.context.fillRect(x, y, width, height);
+  }
+
+  drawRectRotated(x: number, y: number, width: number, height: number, color: string) {
+    const ctx = this.context;
+    ctx.fillStyle = "green";
+    ctx.fillRect(x, y, width, height);
+    ctx.rotate((90 * Math.PI) / 180)
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, width, height);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  clearScreen() {
+    this.context.clearRect(0, 0, this.width, this.height);
+  }
+
+  drawTetrisShape(tetrisShape: TetrisShape) {
+    const matrix = tetrisShape.shapeMatrix;
+    for (let row = 0; row < matrix.length; row++) {
+      for (let col = 0; col < matrix[0].length; col++) {
+        if (matrix[row][col] == 1) {
+          this.drawRect(col * SQUARE_SIZE + tetrisShape.x, row * SQUARE_SIZE + tetrisShape.y, SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
+        }
+      }
+    }
   }
 
   drawCircle(x: number, y: number, radius: number, color: string) {
