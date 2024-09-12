@@ -1,5 +1,5 @@
 import { TetrisShape } from "./Game";
-import { SQUARE_SIZE } from "./Globals";
+import { SQUARE_SIZE, square_test } from "./Globals";
 
 export class Canvas {
   public canvas: HTMLCanvasElement
@@ -8,6 +8,9 @@ export class Canvas {
   public height: number;
   public worldOriginX: number;
   public worldOriginY: number;
+  public totalRows: number;
+  public totalCols: number;
+  public map: number[][];
 
   constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
     if (!canvas || !context) {
@@ -20,7 +23,20 @@ export class Canvas {
     this.height = canvas.height;
     this.worldOriginX = this.width / 2;
     this.worldOriginY = this.height / 2;
+    this.totalRows = 40;
+    this.totalCols = 25;
+    this.map = [];
+    this.initMap();
+  }
 
+  initMap() {
+    for (let row = 0; row < this.totalRows; row++) {
+      const cols = []
+      for (let col = 0; col < this.totalCols; col++) {
+        cols.push(0);
+      }
+      this.map.push(cols)
+    }
   }
 
   drawRect(x: number, y: number, width: number, height: number, color: string) {
@@ -39,15 +55,17 @@ export class Canvas {
   }
 
   clearScreen() {
-    this.context.clearRect(0, 0, this.width, this.height);
+    const ctx = this.context;
+    ctx.clearRect(0, 0, this.width, this.height);
   }
+
 
   drawTetrisShape(tetrisShape: TetrisShape) {
     const matrix = tetrisShape.shapeMatrix;
     for (let row = 0; row < matrix.length; row++) {
       for (let col = 0; col < matrix[0].length; col++) {
         if (matrix[row][col] == 1) {
-          this.drawRect(col * SQUARE_SIZE + tetrisShape.x, row * SQUARE_SIZE + tetrisShape.y, SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
+          this.drawRect(col * SQUARE_SIZE + (tetrisShape.worldCol * SQUARE_SIZE), row * SQUARE_SIZE + (tetrisShape.worldRow * SQUARE_SIZE), SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
         }
       }
     }

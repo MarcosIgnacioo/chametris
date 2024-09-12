@@ -1,48 +1,37 @@
 import { Canvas } from "./Canvas";
-import { SQUARE_SIZE } from "./Globals";
+import { c_is_better2 } from "./Functions";
+import { GRAVITY, map, player, SQUARE_SIZE } from "./Globals";
 
 
 export const L_SHAPE: number[][] = [
-  [0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0],
-  [0, 1, 0, 0, 0],
-  [0, 1, 1, 0, 0],
-  [0, 0, 0, 0, 0],
+  [0, 1, 0, 0],
+  [0, 1, 0, 0],
+  [0, 1, 1, 0],
 ]
 
 export const STUPID_SHAPE: number[][] = [
-  [0, 0, 0, 0, 0],
-  [0, 0, 1, 1, 0],
-  [0, 1, 1, 0, 0],
-  [0, 0, 0, 0, 0],
+  [0, 0, 0],
+  [0, 1, 1],
+  [1, 1, 0],
+  [0, 0, 0],
 ]
 
 export const PENIS_SHAPE: number[][] = [
-  [0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0],
-  [0, 0, 1, 0, 0],
-  [0, 1, 1, 1, 0],
-  [0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0],
+  [0, 1, 0],
+  [1, 1, 1],
+  [0, 0, 0],
 ]
 
 export const SQUARE_SHAPE: number[][] = [
-  [0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0],
-  [0, 1, 1, 1, 0],
-  [0, 1, 1, 1, 0],
-  [0, 1, 1, 1, 0],
-  [0, 0, 0, 0, 0],
+  [1, 1],
+  [1, 1],
 ]
 
 export const GODS_SHAPE: number[][] = [
-  [0, 0, 0, 0, 0],
   [0, 0, 1, 0, 0],
   [0, 0, 1, 0, 0],
   [0, 0, 1, 0, 0],
   [0, 0, 1, 0, 0],
-  [0, 0, 0, 0, 0],
 ]
 export class TetrisUnit {
   public x: number;
@@ -70,8 +59,9 @@ export class TetrisShape {
   public shapesForm: TetrisUnit[];
   public shapeMatrix: number[][];
   public gravity: number;
-  public worldX: number;
-  public worldY: number;
+  public worldRow: number;
+  public worldCol: number;
+  public maxRow: number;
   public screenX: number;
   public screenY: number;
   public pivotX: number;
@@ -80,6 +70,8 @@ export class TetrisShape {
   constructor(x: number, y: number, shapeMatrix: number[][], color: string) {
     this.x = x;
     this.y = y;
+    this.worldRow = 0
+    this.worldCol = 3
     this.shapeMatrix = shapeMatrix;
     this.color = color;
   }
@@ -102,6 +94,30 @@ export class TetrisShape {
         matrix[i][N - j - 1] = temp;
       }
     }
+    let maxRows = 0;
+    for (let i = 0; i < N; ++i) {
+      for (let j = 0; j < matrix[0].length; ++j) {
+        if (matrix[i][j] == 1) {
+          maxRows++;
+          break;
+        }
+      }
+    }
+    this.height = maxRows;
+    console.log("maxrow", this.worldRow)
+    console.log("maxrow", maxRows)
+  }
+
+  checkCollision(tetrisShapes: TetrisShape[]) {
+    tetrisShapes.forEach(shape => {
+      const targetShapeMatrix = shape.shapeMatrix;
+      for (let row = 0; row < targetShapeMatrix.length; row++) {
+        for (let col = 0; col < targetShapeMatrix[0].length; col++) {
+          this.shapeMatrix[row][col]
+          targetShapeMatrix[row][col]
+        }
+      }
+    });
   }
 
 }
@@ -109,7 +125,9 @@ export class TetrisShape {
 export class Game {
 
   public canvas: Canvas;
-  public tetrisShapes: TetrisShape[]
+  public tetrisShapes: TetrisShape[];
+  public isShapeDown: boolean;
+  public currentShape: TetrisShape;
 
   constructor(canvas: Canvas) {
     this.canvas = canvas;
@@ -119,30 +137,75 @@ export class Game {
     this.tetrisShapes.push(new TetrisShape(0, 200, STUPID_SHAPE, "orange"))
     this.tetrisShapes.push(new TetrisShape(200, 200, PENIS_SHAPE, "red"))
     this.tetrisShapes.push(new TetrisShape(500, 60, GODS_SHAPE, "YELLOW"))
-    this.tetrisShapes.forEach(shape => {
-      this.canvas.drawTetrisShape(shape);
-    });
+    this.isShapeDown = true;
+    this.currentShape = null;
   }
 
 
   paint = () => {
+    const canvas = this.canvas;
+    const map = this.canvas.map;
+    canvas.clearScreen();
+    for (let row = 0; row < map.length; row++) {
+      for (let col = 0; col < map[0].length; col++) {
+        const color = ((row + (c_is_better2(col % 2 == 0))) % 2 == 0) ? "gray" : "black"
+        canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, color);
+      }
+    }
+    if (this.currentShape) {
+      canvas.drawTetrisShape(this.currentShape);
+    }
+    // this.tetrisShapes.forEach(shape => {
+    //   canvas.drawTetrisShape(shape);
+    // });
     this.update()
-    this.canvas.clearScreen();
-
-    this.tetrisShapes.forEach(shape => {
-      this.canvas.drawTetrisShape(shape);
-    });
-    // console.log(this.tetrisShapes)
-    this.canvas.drawRectRotated(this.canvas.width / 2, this.canvas.height / 2, 400, 20, "red")
     requestAnimationFrame(this.paint)
   }
 
   update = () => {
-    this.tetrisShapes[0].y += 1;
-
-    this.tetrisShapes.forEach(shape => {
-      shape.y += 1;
-    });
-    console.log("foo");
+    const canvas = this.canvas;
+    if (player.UP) {
+      this.tetrisShapes[0].y -= player.speed;
+    }
+    if (player.DOWN) {
+      this.tetrisShapes[0].y += player.speed;
+    }
+    if (player.LEFT) {
+      this.tetrisShapes[0].x -= player.speed;
+    }
+    if (player.RIGHT) {
+      this.tetrisShapes[0].x += player.speed;
+    }
+    if (player.ROTATE) {
+      this.currentShape.rotate()
+      player.ROTATE = false;
+    }
+    const rand = Math.trunc(Math.random() * 5);
+    if (this.currentShape === null) {
+      this.currentShape = this.tetrisShapes[rand]
+    } else {
+      console.log(this.currentShape.height)
+      if (this.currentShape.worldRow + this.currentShape.height < this.canvas.totalRows) {
+        this.currentShape.worldRow++;
+      } else {
+        const shape = this.currentShape
+        const currRow = this.currentShape.worldRow;
+        const currCol = this.currentShape.worldCol;
+        for (let row = currRow, mRow = 0; row < currRow + shape.shapeMatrix.length; row++) {
+          for (let col = currCol - shape.shapeMatrix[0].length, mCol = 0; col < currCol; col++) {
+            if (shape.shapeMatrix[mRow][mCol]) {
+              canvas.drawRect(col * (SQUARE_SIZE), row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "blue")
+            }
+            mCol++;
+          }
+          mRow++;
+        }
+      }
+    }
+    // this.tetrisShapes.forEach(shape => {
+    //   if (shape.y + 10 < 500) {
+    //     shape.y += (Math.random() * 10) * GRAVITY;
+    //   }
+    // });
   }
 }

@@ -4,4 +4,62 @@ const htmlCanvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById
 const htmlContext: CanvasRenderingContext2D = htmlCanvas.getContext("2d");
 export const canvas: Canvas = new Canvas(htmlCanvas, htmlContext);
 export const GRAVITY: number = 0.3;
-export const SQUARE_SIZE: number = 16;
+export const SQUARE_SIZE: number = 24;
+export const player = {
+  LEFT: false,
+  RIGHT: false,
+  UP: false,
+  DOWN: false,
+  ROTATE: false,
+  speed: 10,
+}
+
+export const square_test = [
+  [
+    1, 1
+  ],
+  [
+    1, 1
+  ]
+]
+
+export const map = [[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+[
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+],
+]
