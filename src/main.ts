@@ -15,7 +15,7 @@ document.addEventListener("keydown", (e) => {
     case "w":
       player.UP = true;
       break;
-    case "s":
+    case " ":
       player.DOWN = true;
       break;
     case "r":
@@ -35,7 +35,7 @@ document.addEventListener("keyup", (e) => {
     case "w":
       player.UP = false;
       break;
-    case "s":
+    case " ":
       player.DOWN = false;
       break;
     case "r":

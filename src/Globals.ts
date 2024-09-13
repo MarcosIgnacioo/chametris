@@ -11,7 +11,7 @@ export const player = {
   UP: false,
   DOWN: false,
   ROTATE: false,
-  speed: 10,
+  speed: 1,
 }
 
 export const square_test = [

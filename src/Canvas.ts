@@ -1,5 +1,5 @@
-import { TetrisShape } from "./Game";
 import { SQUARE_SIZE, square_test } from "./Globals";
+import { TetrisShape } from "./TetrisShape";
 
 export class Canvas {
   public canvas: HTMLCanvasElement
@@ -33,7 +33,12 @@ export class Canvas {
     for (let row = 0; row < this.totalRows; row++) {
       const cols = []
       for (let col = 0; col < this.totalCols; col++) {
-        cols.push(0);
+        if (row > 30) {
+          cols.push(Math.trunc(Math.random() * 2));
+          continue;
+        } else {
+          cols.push(0);
+        }
       }
       this.map.push(cols)
     }
@@ -65,7 +70,19 @@ export class Canvas {
     for (let row = 0; row < matrix.length; row++) {
       for (let col = 0; col < matrix[0].length; col++) {
         if (matrix[row][col] == 1) {
+          console.log(tetrisShape.worldCol)
           this.drawRect(col * SQUARE_SIZE + (tetrisShape.worldCol * SQUARE_SIZE), row * SQUARE_SIZE + (tetrisShape.worldRow * SQUARE_SIZE), SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
+        }
+      }
+    }
+  }
+
+  placeInWorld(tetrisShape: TetrisShape) {
+    const matrix = tetrisShape.shapeMatrix;
+    for (let row = 0; row < matrix.length; row++) {
+      for (let col = 0; col < matrix[0].length; col++) {
+        if (matrix[row][col] == 1) {
+          this.map[tetrisShape.worldRow + row][tetrisShape.worldCol + col] = 1;
         }
       }
     }
@@ -82,5 +99,10 @@ export class Canvas {
   drawText(text: string) {
     this.drawRect(0, 0, 100, 40, "red")
     this.context.strokeText(text, 0, 40);
+  }
+
+  drawTextWhere(text: string, x: number, y: number) {
+    this.context.strokeStyle = 'white'
+    this.context.strokeText(text, x, y);
   }
 }
