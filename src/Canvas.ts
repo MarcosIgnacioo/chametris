@@ -33,12 +33,14 @@ export class Canvas {
     for (let row = 0; row < this.totalRows; row++) {
       const cols = []
       for (let col = 0; col < this.totalCols; col++) {
-        if (row > 30) {
-          cols.push(Math.trunc(Math.random() * 2));
-          continue;
-        } else {
-          cols.push(0);
-        }
+        cols.push(0);
+        // crazy stuff 
+        // if (row > 30) {
+        //   cols.push(Math.trunc(Math.random() * 2));
+        //   continue;
+        // } else {
+        //   cols.push(0);
+        // }
       }
       this.map.push(cols)
     }
@@ -67,25 +69,32 @@ export class Canvas {
 
   drawTetrisShape(tetrisShape: TetrisShape) {
     const matrix = tetrisShape.shapeMatrix;
-    for (let row = 0; row < matrix.length; row++) {
-      for (let col = 0; col < matrix[0].length; col++) {
+    for (let row = tetrisShape.startRow, wRow = 0; row < tetrisShape.startRow + tetrisShape.height; row++, wRow++) {
+      for (let col = tetrisShape.startCol, wCol = 0; col < tetrisShape.startCol + tetrisShape.width; col++, wCol++) {
         if (matrix[row][col] == 1) {
-          console.log(tetrisShape.worldCol)
-          this.drawRect(col * SQUARE_SIZE + (tetrisShape.worldCol * SQUARE_SIZE), row * SQUARE_SIZE + (tetrisShape.worldRow * SQUARE_SIZE), SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
+          this.drawRect(wCol * SQUARE_SIZE + (tetrisShape.worldCol * SQUARE_SIZE), wRow * SQUARE_SIZE + (tetrisShape.worldRow * SQUARE_SIZE), SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
+          // this.drawRect(wCol * SQUARE_SIZE + (tetrisShape.worldCol * SQUARE_SIZE), wRow * SQUARE_SIZE + (tetrisShape.worldRow * SQUARE_SIZE), SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
         }
       }
     }
   }
 
-  placeInWorld(tetrisShape: TetrisShape) {
+  placeInWorld(tetrisShape: TetrisShape, blockValue: number = 1) {
     const matrix = tetrisShape.shapeMatrix;
-    for (let row = 0; row < matrix.length; row++) {
-      for (let col = 0; col < matrix[0].length; col++) {
+    for (let row = tetrisShape.startRow, wRow = 0; row < tetrisShape.startRow + tetrisShape.height; row++, wRow++) {
+      for (let col = tetrisShape.startCol, wCol = 0; col < tetrisShape.startCol + tetrisShape.width; col++, wCol++) {
         if (matrix[row][col] == 1) {
-          this.map[tetrisShape.worldRow + row][tetrisShape.worldCol + col] = 1;
+          this.map[tetrisShape.worldRow + wRow][tetrisShape.worldCol + wCol] = blockValue;
         }
       }
     }
+    // for (let row = 0; row < matrix.length; row++) {
+    //   for (let col = 0; col < matrix[0].length; col++) {
+    //     if (matrix[row][col] == 1) {
+    //       this.map[tetrisShape.worldRow + row][tetrisShape.worldCol + col] = 1;
+    //     }
+    //   }
+    // }
   }
 
   drawCircle(x: number, y: number, radius: number, color: string) {

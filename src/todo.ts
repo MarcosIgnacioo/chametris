@@ -3,7 +3,7 @@
 //     shape.y += (Math.random() * 10) * GRAVITY;
 //   }
 // });
-// console.log(this.currentShape.height)
+// 
 // if (this.currentShape.worldRow + this.currentShape.height < this.canvas.totalRows) {
 //   this.currentShape.worldRow++;
 // } else {

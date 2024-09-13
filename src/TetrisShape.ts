@@ -53,6 +53,9 @@ export class TetrisShape {
   public height: number;
   public color: string;
   public pixels: number;
+  public startRow: number;
+  public startCol: number;
+  public uwuntu: string;
 
   public shapesForm: TetrisUnit[];
   public shapeMatrix: number[][];
@@ -65,13 +68,14 @@ export class TetrisShape {
   public pivotX: number;
   public pivotY: number;
 
-  constructor(x: number, y: number, shapeMatrix: number[][], color: string) {
+  constructor(x: number, y: number, shapeMatrix: number[][], color: string, uwuntu: string) {
     this.x = x;
     this.y = y;
     this.worldRow = 0
     this.worldCol = 3
     this.shapeMatrix = shapeMatrix;
     this.color = color;
+    this.uwuntu = uwuntu;
     this.initShape();
   }
 
@@ -84,20 +88,25 @@ export class TetrisShape {
     let pixels = 0;
     let prevCols = 0;
 
+    let mstr = ""
     // matrix log
-    // mstr += `[${matrix[i][j]}]`
+    // mstr += `[${matrix[i][j]}]`;
+    const cols: number[] = [];
+    for (let i = 0; i < matrix[0].length; i++) {
+      cols.push(0)
+    }
+
     for (let i = 0; i < N; i++) {
       for (let j = 0; j < matrix[0].length; j++) {
         if (matrix[i][j] == 1) {
-          prevCols++;
+          cols[j] += 1;
           pixels++;
         }
       }
-      if (prevCols > maxCols) {
-        maxCols = prevCols;
-      }
-      prevCols = 0;
     }
+
+    this.width = cols.filter(n => n > 0).length;
+    this.pixels = pixels;
 
     for (let i = 0; i < N; ++i) {
       for (let j = 0; j < matrix[0].length; ++j) {
@@ -109,8 +118,27 @@ export class TetrisShape {
     }
 
     this.height = maxRows;
-    this.width = maxCols;
-    this.pixels = pixels;
+
+    let startRow: number = Infinity;
+    let startCol: number = Infinity;
+
+
+    for (let i = 0; i < N; ++i) {
+      for (let j = 0; j < matrix[0].length; ++j) {
+        if (matrix[i][j] == 1) {
+          if (i < startRow) {
+            startRow = i
+          }
+          if (j < startCol) {
+            startCol = j
+          }
+        }
+      }
+    }
+    this.startRow = startRow;
+    this.startCol = startCol;
+
+
   }
 
   rotate() {
@@ -144,28 +172,49 @@ export class TetrisShape {
 
     this.height = maxRows;
 
-    let prevCols = 0;
+    // let mstr = ""
+
     let maxCols = 0;
-    let mstr = ""
+
+    const cols: number[] = [];
+    for (let i = 0; i < matrix[0].length; i++) {
+      cols.push(0)
+    }
 
     for (let i = 0; i < matrix.length; i++) {
       for (let j = 0; j < matrix[0].length; j++) {
         if (matrix[i][j] == 1) {
-          mstr += `[${matrix[i][j]}]`
-          prevCols++;
+          cols[j] = 1
         }
       }
-      if (prevCols > maxCols) {
-        maxCols = prevCols;
-      }
-      prevCols = 0;
-      mstr += `\n`
     }
+
+    this.width = cols.filter(n => n > 0).length;
 
     // matrix log
     // mstr += `[${matrix[i][j]}]`
 
-    this.width = maxCols;
+
+    let startRow: number = Infinity;
+    let startCol: number = Infinity;
+
+    for (let i = 0; i < N; ++i) {
+      for (let j = 0; j < matrix[0].length; ++j) {
+        if (matrix[i][j] == 1) {
+          if (i < startRow) {
+            startRow = i
+          }
+          if (j < startCol) {
+            startCol = j
+          }
+        }
+      }
+    }
+
+    this.startRow = startRow;
+    this.startCol = startCol;
+
+
   }
 
   checkCollision(tetrisShapes: TetrisShape[]) {
@@ -218,5 +267,4 @@ export class TetrisShape {
     }
     return worldRow;
   }
-
 }
