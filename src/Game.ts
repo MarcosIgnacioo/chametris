@@ -70,9 +70,29 @@ export class Game {
     }
     if (player.DOWN) {
       player.DOWN = false;
-      this.currentShape.worldRow = this.PAIN(this.currentShape.worldCol)
-      this.canvas.placeInWorld(this.currentShape);
-      this.currentShape = null;
+      const extremes = []
+      for (let r = 0; r < this.currentShape.shapeMatrix.length; r++) {
+        for (let c = 0; c < this.currentShape.shapeMatrix[0].length; c++) {
+          if (this.currentShape.shapeMatrix[r][c] == 1 && (this.currentShape.shapeMatrix[r + 1] == undefined || this.currentShape.shapeMatrix[r + 1][c] == 0)) {
+            extremes.push({ row: r, col: c })
+          }
+        }
+      }
+      const map = this.canvas.map
+      let increment = 1;
+      for (let i = 0; i < extremes.length; i++) {
+        const vect = extremes[i]
+        const { wRow, wCol } = this.localToWorld(this.currentShape, vect.row, vect.col)
+        if (map[wRow + 1][wCol] == 1) {
+          console.log("og", vect.row, vect.col)
+          console.log("shape~~", this.currentShape.worldRow, this.currentShape.worldCol)
+          console.log("world~~", wRow, wCol)
+          increment = 0;
+        }
+      }
+      this.currentShape.worldRow += increment
+      console.log(extremes)
+      console.log(this.currentShape.worldRow)
     }
 
     if (player.LEFT) {
@@ -87,13 +107,19 @@ export class Game {
 
     if (player.ROTATE) {
       this.currentShape.rotate()
+      console.log("weprotacion")
       player.ROTATE = false;
     }
 
     if (this.currentShape === null) {
       this.currentShape = this.generateRandomShape()
     }
-    this.shadow()
+
+  }
+
+  localToWorld(tetrisShape: TetrisShape, row: number, col: number) {
+    console.log("adsf", tetrisShape.startRow, tetrisShape.startCol);
+    return { wRow: tetrisShape.worldRow + row, wCol: tetrisShape.worldCol + col }
   }
 
   shadow() {
@@ -105,14 +131,14 @@ export class Game {
       }
     }
     let shadow = { ... this.currentShape }
-    shadow.worldRow = this.PAIN(shadow.worldCol, true)
+    shadow.worldRow = this.getHighestRowPossible(shadow.worldCol, true)
     this.canvas.placeInWorld(shadow as TetrisShape, 2);
   }
 
   // caveman afff
   generateRandomShape(): TetrisShape {
     let shape: TetrisShape;
-    const whichShape = Math.trunc(Math.random() * 1)
+    const whichShape = Math.trunc(Math.random() * 5)
     switch (whichShape) {
       case 0:
         shape = new TetrisShape(0, 0, PENIS_SHAPE, "red", ".|.")
@@ -173,57 +199,45 @@ export class Game {
     const shapeHeight = this.currentShape.height;
     const name = this.currentShape.uwuntu
     let row = 0
-    let mstr = "";
     for (; row < this.canvas.totalRows; row++) {
       for (let col = shapeCol; col < shapeCol + shapeWidth; col++) {
-        mstr += `[${map[row][col]}]`
         if (map[row][col] == 1) {
-          console.log(mstr)
-          if (isShadow) {
-            console.log(`${row} - ${shapeHeight}`, row - shapeHeight)
-          }
           return row - shapeHeight;
         }
       }
-      mstr += `\n----\n`
     }
     return row - shapeHeight;
   }
 
-  PAIN(shapeCol: number, isShadow = false) {
-    console.log("pains version")
+  PAIN(tetrisShape: TetrisShape, pivotRow: number): number {
+
     const map = this.canvas.map
-    const shapeWidth = this.currentShape.width;
-    const shapeHeight = this.currentShape.height;
-    const matrixShape = this.currentShape.shapeMatrix;
-    const totalShapesPossible = map.length / shapeHeight;
-    const startRow = this.currentShape.startRow
-    const startCol = this.currentShape.startCol
     let mstr = ""
     let mstr2 = ""
-    let worldCol = shapeCol;
+    let possibleRows = []
+    const { width, height, shapeMatrix, startRow, startCol } = this.currentShape;
 
-    for (let row = startRow, worldRow = 0; row < shapeHeight; row++, worldRow++) {
-      for (let col = startCol; col < shapeWidth; col++, worldCol++) {
-        mstr += `[${matrixShape[row][col]}]`
-        console.log(worldRow)
-        // mstr2 += `[${map[worldRow][worldCol]}]`
-        // if (map[worldRow][worldCol] == 1) {
-        //   col = Infinity;
-        //   row = Infinity;
-        // }
+    for (let ROW = 0; ROW < map.length; ROW++) {
+      for (
+        let localRow = startRow, worldRow = ROW;
+        localRow < startRow + height;
+        localRow++, worldRow++) {
+        for (
+          let localCol = startCol, { worldCol } = tetrisShape;
+          localCol < startCol + width;
+          localCol++, worldCol++
+        ) {
+
+          if ((map[worldRow] !== undefined) && map[worldRow][worldCol] == 1) {
+            possibleRows.push(worldRow)
+            localRow = Infinity
+            localCol = Infinity
+          }
+        }
       }
-      worldCol = shapeCol
-      mstr += `\n`
-      mstr2 += `\n`
     }
-    console.log(mstr)
-    console.log("///////")
-    // console.log(mstr2)
-    mstr = ""
-    mstr2 = ""
 
-    return 30
+    return -1
   }
 
 }

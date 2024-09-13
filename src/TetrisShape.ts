@@ -15,8 +15,8 @@ export const STUPID_SHAPE: number[][] = [
 
 export const PENIS_SHAPE: number[][] = [
   [0, 1, 0],
-  [1, 1, 1],
-  [0, 0, 0],
+  [0, 1, 1],
+  [0, 1, 0],
 ]
 
 export const SQUARE_SHAPE: number[][] = [
@@ -267,4 +267,5 @@ export class TetrisShape {
     }
     return worldRow;
   }
+
 }

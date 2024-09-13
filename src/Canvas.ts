@@ -33,17 +33,28 @@ export class Canvas {
     for (let row = 0; row < this.totalRows; row++) {
       const cols = []
       for (let col = 0; col < this.totalCols; col++) {
-        cols.push(0);
+        // cols.push(0);
         // crazy stuff 
-        // if (row > 30) {
-        //   cols.push(Math.trunc(Math.random() * 2));
-        //   continue;
-        // } else {
-        //   cols.push(0);
-        // }
+        if (row > 30) {
+          cols.push(Math.trunc(Math.random() * 5));
+          continue;
+        } else {
+          cols.push(0);
+        }
+        // cols.push(0);
       }
       this.map.push(cols)
     }
+    this.map[39][0] = 1
+    this.map[39][1] = 1
+    this.map[39][2] = 1
+    this.map[39][3] = 1
+    this.map[39][4] = 1
+    this.map[38][4] = 1
+    this.map[38][3] = 1
+    this.map[38][4] = 0
+    this.map[38][5] = 1
+    this.map[38][6] = 1
   }
 
   drawRect(x: number, y: number, width: number, height: number, color: string) {
@@ -69,8 +80,9 @@ export class Canvas {
 
   drawTetrisShape(tetrisShape: TetrisShape) {
     const matrix = tetrisShape.shapeMatrix;
-    for (let row = tetrisShape.startRow, wRow = 0; row < tetrisShape.startRow + tetrisShape.height; row++, wRow++) {
-      for (let col = tetrisShape.startCol, wCol = 0; col < tetrisShape.startCol + tetrisShape.width; col++, wCol++) {
+    const { startRow, startCol } = tetrisShape;
+    for (let row = 0, wRow = 0; row < + matrix.length; row++, wRow++) {
+      for (let col = 0, wCol = 0; col < + matrix[0].length; col++, wCol++) {
         if (matrix[row][col] == 1) {
           this.drawRect(wCol * SQUARE_SIZE + (tetrisShape.worldCol * SQUARE_SIZE), wRow * SQUARE_SIZE + (tetrisShape.worldRow * SQUARE_SIZE), SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
           // this.drawRect(wCol * SQUARE_SIZE + (tetrisShape.worldCol * SQUARE_SIZE), wRow * SQUARE_SIZE + (tetrisShape.worldRow * SQUARE_SIZE), SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
