@@ -33,7 +33,9 @@ export class Canvas {
     for (let row = 0; row < this.totalRows; row++) {
       const cols = []
       for (let col = 0; col < this.totalCols; col++) {
-        if (row == this.totalRows - 1) {
+        if (row > 30 && col < 8) {
+          cols.push(1);
+        } else if (row == this.totalRows - 1) {
           cols.push(1);
         } else {
           cols.push(0);
@@ -49,17 +51,17 @@ export class Canvas {
       }
       this.map.push(cols)
     }
-    // this.map[39][0] = 1
-    // this.map[39][0] = 1
-    // this.map[39][1] = 1
-    // this.map[39][2] = 1
-    // this.map[39][3] = 1
-    // this.map[39][4] = 1
-    // this.map[38][4] = 1
-    // this.map[38][3] = 1
-    // this.map[38][4] = 0
-    // this.map[38][5] = 1
-    // this.map[38][6] = 1
+    this.map[39][0] = 1
+    this.map[39][0] = 1
+    this.map[39][1] = 1
+    this.map[39][2] = 1
+    this.map[39][3] = 1
+    this.map[39][4] = 1
+    this.map[38][4] = 1
+    this.map[38][3] = 1
+    this.map[38][4] = 0
+    this.map[38][5] = 1
+    this.map[38][6] = 1
   }
 
   drawRect(x: number, y: number, width: number, height: number, color: string) {

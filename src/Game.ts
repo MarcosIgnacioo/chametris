@@ -45,7 +45,8 @@ export class Game {
     for (let row = 0; row < map.length; row++) {
       for (let col = 0; col < map[0].length; col++) {
         if (map[row][col] == 1) {
-          canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "blue");
+          canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "white");
+          canvas.context.strokeRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
         }
         // if (map[row][col] == 2) {
         //   canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "red");
@@ -71,6 +72,11 @@ export class Game {
     } else {
       this.deltaTime = 0;
     }
+
+    if (this.currentShape) {
+      this.goDown()
+    }
+
     if (player.UP) {
       this.tetrisShapes[0].y -= player.speed;
     }
@@ -79,36 +85,33 @@ export class Game {
       this.instantDown()
       this.canvas.placeInWorld(this.currentShape);
       this.currentShape = null;
-      // this.PAIN(this.currentShape, 0)
-      // console.log(this.getHighestRowPossible(this.currentShape.worldCol) + this.currentShape.height)
     }
 
-    if (player.LEFT) {
+    if (player.LEFT && this.currentShape) {
       this.currentShape.worldCol -= player.speed;
       player.LEFT = false;
     }
 
-    if (player.RIGHT) {
+    if (player.RIGHT && this.currentShape) {
       this.currentShape.worldCol += player.speed;
       player.RIGHT = false;
     }
 
-    if (player.ROTATE) {
+    if (player.ROTATE && this.currentShape) {
       this.currentShape.rotate()
-      console.log("weprotacion")
       player.ROTATE = false;
     }
 
     if (this.currentShape === null) {
       this.currentShape = this.generateRandomShape()
     }
-    this.goDown()
+
 
   }
 
   instantDown() {
     const vertices = this.currentShape.vertices;
-    console.log(vertices)
+    // console.log(vertices)
     const map = this.canvas.map
     const currRow = this.currentShape.worldRow;
     let rowsToMove: number = 0;
@@ -144,9 +147,26 @@ export class Game {
     for (let i = 0; i < vertices.length; i++) {
       const vect = vertices[i]
       const { wRow, wCol } = this.localToWorld(this.currentShape, vect.row, vect.col)
+
+      if (map[wRow][wCol] == 1) {
+        increment = false;
+        break;
+      }
       if (map[wRow + 1][wCol] == 1) {
         increment = false;
         break;
+      }
+      if (player.LEFT && map[wRow][wCol - 1] == 1) {
+        console.log("wep")
+        this.currentShape.printShape()
+        player.LEFT = false;
+        // this.currentShape.worldCol += player.speed;
+      }
+      if (player.RIGHT && map[wRow][wCol + 1] == 1) {
+        console.log("wep")
+        this.currentShape.printShape()
+        player.RIGHT = false;
+        // this.currentShape.worldCol += player.speed;
       }
     }
 

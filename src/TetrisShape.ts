@@ -37,6 +37,7 @@ export const GODS_SHAPE: number[][] = [
   [0, 0, 1, 0, 0],
   [0, 0, 1, 0, 0],
 ]
+
 export class TetrisUnit {
   public x: number;
   public y: number;
@@ -284,7 +285,7 @@ export class TetrisShape {
         }
       }
     }
-    console.log(vertices)
+    // console.log(vertices)
     this.printShape()
     this.vertices = vertices;
   }
@@ -296,7 +297,7 @@ export class TetrisShape {
       }
       mstr += `\n`
     }
-    console.log(mstr)
+    // console.log(mstr)
   }
 
 }
