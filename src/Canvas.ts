@@ -93,8 +93,8 @@ export class Canvas {
 
   placeInWorld(tetrisShape: TetrisShape, blockValue: number = 1) {
     const matrix = tetrisShape.shapeMatrix;
-    for (let row = tetrisShape.startRow, wRow = 0; row < tetrisShape.startRow + tetrisShape.height; row++, wRow++) {
-      for (let col = tetrisShape.startCol, wCol = 0; col < tetrisShape.startCol + tetrisShape.width; col++, wCol++) {
+    for (let row = 0, wRow = 0; row < matrix.length; row++, wRow++) {
+      for (let col = 0, wCol = 0; col < matrix[0].length; col++, wCol++) {
         if (matrix[row][col] == 1) {
           this.map[tetrisShape.worldRow + wRow][tetrisShape.worldCol + wCol] = blockValue;
         }

@@ -1,5 +1,10 @@
 import { SQUARE_SIZE } from "./Globals"
 
+export interface Vertices {
+  row: number
+  col: number
+}
+
 export const L_SHAPE: number[][] = [
   [0, 1, 0, 0],
   [0, 1, 0, 0],
@@ -56,6 +61,7 @@ export class TetrisShape {
   public startRow: number;
   public startCol: number;
   public uwuntu: string;
+  public vertices: Vertices[];
 
   public shapesForm: TetrisUnit[];
   public shapeMatrix: number[][];
@@ -137,8 +143,7 @@ export class TetrisShape {
     }
     this.startRow = startRow;
     this.startCol = startCol;
-
-
+    this.shapeVertices()
   }
 
   rotate() {
@@ -214,7 +219,7 @@ export class TetrisShape {
     this.startRow = startRow;
     this.startCol = startCol;
 
-
+    this.shapeVertices()
   }
 
   checkCollision(tetrisShapes: TetrisShape[]) {
@@ -266,6 +271,18 @@ export class TetrisShape {
       }
     }
     return worldRow;
+  }
+
+  shapeVertices(): void {
+    const vertices: Vertices[] = []
+    for (let r = 0; r < this.shapeMatrix.length; r++) {
+      for (let c = 0; c < this.shapeMatrix[0].length; c++) {
+        if (this.shapeMatrix[r][c] == 1 && (this.shapeMatrix[r + 1] == undefined || this.shapeMatrix[r + 1][c] == 0)) {
+          vertices.push(({ row: r, col: c }) as Vertices)
+        }
+      }
+    }
+    this.vertices = vertices;
   }
 
 }

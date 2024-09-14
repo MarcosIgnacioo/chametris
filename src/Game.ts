@@ -46,9 +46,9 @@ export class Game {
         if (map[row][col] == 1) {
           canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "blue");
         }
-        if (map[row][col] == 2) {
-          canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "red");
-        }
+        // if (map[row][col] == 2) {
+        //   canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "red");
+        // }
       }
     }
     // this.tetrisShapes.forEach(shape => {
@@ -70,29 +70,11 @@ export class Game {
     }
     if (player.DOWN) {
       player.DOWN = false;
-      const extremes = []
-      for (let r = 0; r < this.currentShape.shapeMatrix.length; r++) {
-        for (let c = 0; c < this.currentShape.shapeMatrix[0].length; c++) {
-          if (this.currentShape.shapeMatrix[r][c] == 1 && (this.currentShape.shapeMatrix[r + 1] == undefined || this.currentShape.shapeMatrix[r + 1][c] == 0)) {
-            extremes.push({ row: r, col: c })
-          }
-        }
-      }
-      const map = this.canvas.map
-      let increment = 1;
-      for (let i = 0; i < extremes.length; i++) {
-        const vect = extremes[i]
-        const { wRow, wCol } = this.localToWorld(this.currentShape, vect.row, vect.col)
-        if (map[wRow + 1][wCol] == 1) {
-          console.log("og", vect.row, vect.col)
-          console.log("shape~~", this.currentShape.worldRow, this.currentShape.worldCol)
-          console.log("world~~", wRow, wCol)
-          increment = 0;
-        }
-      }
-      this.currentShape.worldRow += increment
-      console.log(extremes)
-      console.log(this.currentShape.worldRow)
+      this.goDown()
+      this.canvas.placeInWorld(this.currentShape);
+      this.currentShape = null;
+      // this.PAIN(this.currentShape, 0)
+      // console.log(this.getHighestRowPossible(this.currentShape.worldCol) + this.currentShape.height)
     }
 
     if (player.LEFT) {
@@ -114,11 +96,65 @@ export class Game {
     if (this.currentShape === null) {
       this.currentShape = this.generateRandomShape()
     }
+  }
 
+  goDown() {
+    const vertices = this.currentShape.vertices;
+    const map = this.canvas.map
+    const currRow = this.currentShape.worldRow;
+    let rowsToMove: number = 0;
+    if (map[currRow + 1] == undefined) {
+      return;
+    }
+
+    let { worldRow, worldCol } = this.currentShape;
+
+    for (let mRow = currRow; mRow < map.length; mRow++) {
+      for (let i = 0; i < vertices.length; i++) {
+        const vertex = vertices[i]
+        const { wRow, wCol } = this.localToWorldle(worldRow, worldCol, vertex.row, vertex.col)
+        if (map[wRow + 1][wCol] == 1) {
+          mRow = Infinity;
+          break;
+        }
+      }
+      worldRow++;
+      rowsToMove++;
+    }
+    this.currentShape.worldRow += rowsToMove - 1
+  }
+
+  XD() {
+    const extremes = []
+    for (let r = 0; r < this.currentShape.shapeMatrix.length; r++) {
+      for (let c = 0; c < this.currentShape.shapeMatrix[0].length; c++) {
+        if (this.currentShape.shapeMatrix[r][c] == 1 && (this.currentShape.shapeMatrix[r + 1] == undefined || this.currentShape.shapeMatrix[r + 1][c] == 0)) {
+          extremes.push({ row: r, col: c })
+        }
+      }
+    }
+    const map = this.canvas.map
+    let increment = 1;
+    for (let i = 0; i < extremes.length; i++) {
+      const vect = extremes[i]
+      const { wRow, wCol } = this.localToWorld(this.currentShape, vect.row, vect.col)
+      if (map[wRow + 1][wCol] == 1) {
+        console.log("og", vect.row, vect.col)
+        console.log("shape~~", this.currentShape.worldRow, this.currentShape.worldCol)
+        console.log("world~~", wRow, wCol)
+        increment = 0;
+      }
+    }
+    this.currentShape.worldRow += increment
+    console.log(extremes)
+    console.log(this.currentShape.worldRow)
+  }
+
+  localToWorldle(wRow: number, wCol: number, row: number, col: number) {
+    return { wRow: wRow + row, wCol: wCol + col }
   }
 
   localToWorld(tetrisShape: TetrisShape, row: number, col: number) {
-    console.log("adsf", tetrisShape.startRow, tetrisShape.startCol);
     return { wRow: tetrisShape.worldRow + row, wCol: tetrisShape.worldCol + col }
   }
 
