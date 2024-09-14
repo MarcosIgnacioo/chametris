@@ -33,9 +33,9 @@ export class Canvas {
     for (let row = 0; row < this.totalRows; row++) {
       const cols = []
       for (let col = 0; col < this.totalCols; col++) {
-        if (row > 30 && col < 8) {
-          cols.push(1);
-        } else if (row == this.totalRows - 1) {
+        if (row == this.totalRows - 1) {
+          cols.push(1)
+        } else if (row % 2 == 1 && col % 2 == 1 && col < 8) {
           cols.push(1);
         } else {
           cols.push(0);
@@ -98,6 +98,21 @@ export class Canvas {
         }
       }
     }
+  }
+
+  testCollision(tetrisShape: TetrisShape) {
+    const matrix = tetrisShape.shapeMatrix;
+    let mstr = ""
+    for (let row = 0, wRow = 0; row < matrix.length; row++, wRow++) {
+      for (let col = 0, wCol = 0; col < matrix[0].length; col++, wCol++) {
+        if (matrix[row][col] == 1) {
+          console.log(this.map[tetrisShape.worldRow + wRow][tetrisShape.worldCol + wCol]);
+          mstr += `[${this.map[row][col]}]`
+        }
+      }
+      mstr += `\n`
+    }
+    console.log(mstr)
   }
 
   drawCircle(x: number, y: number, radius: number, color: string) {

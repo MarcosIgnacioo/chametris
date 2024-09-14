@@ -1,6 +1,6 @@
 import { Canvas } from "./Canvas";
 import { c_is_better2 } from "./Functions";
-import { canvas, GRAVITY, map, player, SQUARE_SIZE, square_test } from "./Globals";
+import { canvas, GRAVITY, player, SQUARE_SIZE, square_test } from "./Globals";
 import { TetrisShape, L_SHAPE, SQUARE_SHAPE, STUPID_SHAPE, PENIS_SHAPE, GODS_SHAPE } from "./TetrisShape";
 export class Game {
 
@@ -68,19 +68,16 @@ export class Game {
 
   update = () => {
 
-    if (this.currentShape) {
-      this.goDown()
-    }
+    // if (this.currentShape) {
+    //   this.goDown()
+    // }
+
     if (this.deltaTime < 15) {
       this.deltaTime++
     } else {
       this.deltaTime = 0;
     }
 
-
-    if (player.UP) {
-      this.tetrisShapes[0].y -= player.speed;
-    }
     if (player.DOWN) {
       player.DOWN = false;
       this.instantDown()
@@ -89,18 +86,49 @@ export class Game {
     }
 
     if (player.LEFT && this.currentShape) {
-      this.currentShape.worldCol -= player.speed;
-      player.LEFT = false;
+      console.log(this.currentShape.worldRow)
+      console.log(this.currentShape.worldCol)
+      const m = this.currentShape.shapeMatrix
+      let wR = this.currentShape.worldRow
+      const map = this.canvas.map
+      let wC = this.currentShape.worldCol
+      const collides = this.currentShape.checkCollision(map, this.currentShape.worldRow, this.currentShape.worldCol - 1)
+      if (!collides) {
+        this.currentShape.worldCol -= 1;
+      }
+      let cols = ""
+      // const death = []
+      // for (let row = 0, wwR = wR; row < m.length; row++, wwR++) {
+      //   for (let col = 0, wwC = wC; col < m[0].length; col++, wwC++) {
+      //     death.push({ wwR, wwC })
+      //     if (m[row][col] == 1) {
+      //       if (map[wwR][wwC] == 1) {
+      //         this.currentShape.worldCol += 1;
+      //       }
+      //     }
+      //   }
+      // }
+      player.LEFT = false
     }
 
     if (player.RIGHT && this.currentShape) {
-      this.currentShape.worldCol += player.speed;
-      player.RIGHT = false;
+      this.currentShape.worldCol += 1;
+      player.RIGHT = false
+    }
+
+    if (player.UP && this.currentShape) {
+      this.currentShape.worldRow -= 1;
+      player.UP = false
+    }
+
+    if (player.DOWNa && this.currentShape) {
+      this.currentShape.worldRow += 1;
+      player.DOWNa = false
     }
 
     if (player.ROTATE && this.currentShape) {
       this.currentShape.rotate()
-      player.ROTATE = false;
+      player.ROTATE = false
     }
 
     if (this.currentShape === null) {
@@ -112,7 +140,6 @@ export class Game {
 
   instantDown() {
     const vertices = this.currentShape.vertices;
-    // console.log(vertices)
     const map = this.canvas.map
     const currRow = this.currentShape.worldRow;
     let rowsToMove: number = 0;
@@ -142,7 +169,7 @@ export class Game {
     const map = this.canvas.map
     const currRow = this.currentShape.worldRow;
     if (map[currRow + 1] == undefined) {
-      return;
+      return map.length - 2;
     }
     let increment = true;
     for (let i = 0; i < vertices.length; i++) {
@@ -159,22 +186,8 @@ export class Game {
         break;
       }
 
-      if (player.LEFT && map[wRow][wCol - 1] == 1
-        || player.LEFT && map[wRow + 1][wCol - 1] == 1
-      ) {
-        this.currentShape.printShape()
-        player.LEFT = false;
-      }
 
-      if (player.RIGHT && map[wRow][wCol + 1] == 1
-        || player.RIGHT && map[wRow + 1][wCol + 1] == 1
-      ) {
-        this.currentShape.printShape()
-        player.RIGHT = false;
-      }
     }
-
-    console.log(this.deltaTime)
     if (!increment) {
       this.canvas.placeInWorld(this.currentShape);
       this.currentShape = null;

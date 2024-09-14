@@ -65,6 +65,8 @@ export class TetrisShape {
   public startCol: number;
   public uwuntu: string;
   public vertices: Vertices[];
+  public leftVertices: Vertices[];
+  public rightVertices: Vertices[];
 
   public shapesForm: TetrisUnit[];
   public shapeMatrix: number[][];
@@ -92,14 +94,9 @@ export class TetrisShape {
     const matrix = this.shapeMatrix;
     const N = matrix.length;
 
-    let maxCols = 0
     let maxRows = 0;
     let pixels = 0;
-    let prevCols = 0;
 
-    let mstr = ""
-    // matrix log
-    // mstr += `[${matrix[i][j]}]`;
     const cols: number[] = [];
     for (let i = 0; i < matrix[0].length; i++) {
       cols.push(0)
@@ -147,6 +144,19 @@ export class TetrisShape {
     this.startRow = startRow;
     this.startCol = startCol;
     this.shapeVertices()
+    this.shapeLeftVertices()
+    // this.shapeRightVertices()
+  }
+
+  checkCollision(map: number[][], wR: number, wC: number): boolean {
+    const m = this.shapeMatrix;
+    for (let row = 0, wwR = wR; row < m.length; row++, wwR++) {
+      for (let col = 0, wwC = wC; col < m[0].length; col++, wwC++) {
+        if (m[row][col] == 1 && map[wwR][wwC] == 1) {
+          return true;
+        }
+      }
+    }
   }
 
   rotate() {
@@ -168,112 +178,93 @@ export class TetrisShape {
         matrix[i][N - j - 1] = temp;
       }
     }
-    let maxRows = 0;
-    for (let i = 0; i < N; ++i) {
-      for (let j = 0; j < matrix[0].length; ++j) {
-        if (matrix[i][j] == 1) {
-          maxRows++;
-          break;
-        }
-      }
-    }
 
-    this.height = maxRows;
+    // let maxRows = 0;
+    // for (let i = 0; i < N; ++i) {
+    //   for (let j = 0; j < matrix[0].length; ++j) {
+    //     if (matrix[i][j] == 1) {
+    //       maxRows++;
+    //       break;
+    //     }
+    //   }
+    // }
+    //
+    // this.height = maxRows;
+    //
+    // // let mstr = ""
+    //
+    // let maxCols = 0;
+    //
+    // const cols: number[] = [];
+    // for (let i = 0; i < matrix[0].length; i++) {
+    //   cols.push(0)
+    // }
+    //
+    // for (let i = 0; i < matrix.length; i++) {
+    //   for (let j = 0; j < matrix[0].length; j++) {
+    //     if (matrix[i][j] == 1) {
+    //       cols[j] = 1
+    //     }
+    //   }
+    // }
+    //
+    // this.width = cols.filter(n => n > 0).length;
+    //
+    // let startRow: number = Infinity;
+    // let startCol: number = Infinity;
+    //
+    // for (let i = 0; i < N; ++i) {
+    //   for (let j = 0; j < matrix[0].length; ++j) {
+    //     if (matrix[i][j] == 1) {
+    //       if (i < startRow) {
+    //         startRow = i
+    //       }
+    //       if (j < startCol) {
+    //         startCol = j
+    //       }
+    //     }
+    //   }
+    // }
+    //
+    // this.startRow = startRow;
+    // this.startCol = startCol;
 
-    // let mstr = ""
-
-    let maxCols = 0;
-
-    const cols: number[] = [];
-    for (let i = 0; i < matrix[0].length; i++) {
-      cols.push(0)
-    }
-
-    for (let i = 0; i < matrix.length; i++) {
-      for (let j = 0; j < matrix[0].length; j++) {
-        if (matrix[i][j] == 1) {
-          cols[j] = 1
-        }
-      }
-    }
-
-    this.width = cols.filter(n => n > 0).length;
-
-    // matrix log
-    // mstr += `[${matrix[i][j]}]`
-
-
-    let startRow: number = Infinity;
-    let startCol: number = Infinity;
-
-    for (let i = 0; i < N; ++i) {
-      for (let j = 0; j < matrix[0].length; ++j) {
-        if (matrix[i][j] == 1) {
-          if (i < startRow) {
-            startRow = i
-          }
-          if (j < startCol) {
-            startCol = j
-          }
-        }
-      }
-    }
-
-    this.startRow = startRow;
-    this.startCol = startCol;
-
-    this.shapeVertices()
+    this.initShape()
   }
 
-  checkCollision(tetrisShapes: TetrisShape[]) {
-    tetrisShapes.forEach(shape => {
-      const targetShapeMatrix = shape.shapeMatrix;
-      for (let row = 0; row < targetShapeMatrix.length; row++) {
-        for (let col = 0; col < targetShapeMatrix[0].length; col++) {
-          this.shapeMatrix[row][col]
-          targetShapeMatrix[row][col]
+  shapeLeftVertices(): void {
+    const vertices: Vertices[] = []
+    let foundLeftMostCol = false;
+    for (let r = 0; r < this.shapeMatrix.length; r++) {
+      for (let c = 0; c < this.shapeMatrix[0].length; c++) {
+        if (this.shapeMatrix[r][c] == 1) {
+          foundLeftMostCol = true;
+          vertices.push(({ row: r, col: c }) as Vertices)
         }
       }
-    });
-  }
-
-  getLowestRowPossibleInThisCol(worldMap: number[][], totalRows: number): number {
-    let worldRowLimit = totalRows;
-    let pixelsRendered = 0;
-    let worldCol = this.worldCol;
-    for (let lowestRow = worldRowLimit - 1; lowestRow >= 0; lowestRow--) {
-      for (let mRow = 0; mRow < this.shapeMatrix.length; mRow++) {
-        for (let mCol = 0; mCol < this.shapeMatrix[0].length; mCol++) {
-          if (this.shapeMatrix[mRow][mCol] == 1) {
-            if (worldMap[lowestRow - mRow][worldCol] == 0) {
-              pixelsRendered++;
-            } else {
-              break;
-            }
-          }
-          worldCol++;
-        }
-        worldCol = this.worldCol;
-      }
-      if (pixelsRendered == this.pixels) {
-        return lowestRow;
-      }
-      pixelsRendered = 0;
-    }
-    return -1;
-  }
-
-  getLowestRowPossibleInThisColv2(worldMap: number[][], totalRows: number): number {
-    let worldCol = this.worldCol;
-    let worldRow = totalRows - this.height;
-    for (let wRow = worldRow, sRow = 0; wRow < totalRows; wRow++, sRow++) {
-      for (let wCol = worldCol, sCol = 0; wCol < worldCol + this.shapeMatrix[0].length; wCol++, sCol++) {
-        if (worldMap[wRow][wCol] == 1 && this.shapeMatrix[sRow][sCol] == 1) {
-          return this.getLowestRowPossibleInThisColv2(worldMap, totalRows - 1);
-        }
+      if (foundLeftMostCol) {
+        break;
       }
     }
-    return worldRow;
+    this.leftVertices = vertices;
+  }
+
+  shapeRightVertices(): void {
+    const vertices: Vertices[] = []
+    let rightMostCol = this.shapeMatrix[0].length;
+    let foundRightMostCol = false;
+    for (let r = 0; r < this.shapeMatrix.length; r++) {
+      for (let c = rightMostCol; c >= 0; c--) {
+        if (this.shapeMatrix[r][c] == 1) {
+          foundRightMostCol = true;
+          vertices.push(({ row: r, col: c }) as Vertices)
+        }
+      }
+      if (foundRightMostCol) {
+        break;
+      }
+    }
+    this.leftVertices = vertices;
   }
 
   shapeVertices(): void {
@@ -289,6 +280,21 @@ export class TetrisShape {
     this.printShape()
     this.vertices = vertices;
   }
+
+  shapeGetLeftMostVertices(): Vertices[] {
+    let prevCol = Infinity;
+    const leftMost: Vertices[] = []
+    for (let i = 0; i < this.vertices.length; i++) {
+      if (this.vertices[i].col < prevCol) {
+        leftMost.pop()
+      }
+      if (this.vertices[i].col <= prevCol) {
+        leftMost.push(this.vertices[i])
+        prevCol = this.vertices[i].col;
+      }
+    }
+    return leftMost
+  }
   printShape(): void {
     let mstr = "";
     for (let i = 0; i < this.shapeMatrix.length; i++) {
@@ -297,7 +303,7 @@ export class TetrisShape {
       }
       mstr += `\n`
     }
-    // console.log(mstr)
+    console.log(mstr)
   }
 
 }
