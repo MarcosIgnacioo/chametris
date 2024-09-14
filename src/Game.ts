@@ -152,21 +152,24 @@ export class Game {
         increment = false;
         break;
       }
+
       if (map[wRow + 1][wCol] == 1) {
         increment = false;
         break;
       }
-      if (player.LEFT && map[wRow][wCol - 1] == 1) {
-        console.log("wep")
+
+      if (player.LEFT && map[wRow][wCol - 1] == 1
+        || player.LEFT && map[wRow + 1][wCol - 1] == 1
+      ) {
         this.currentShape.printShape()
         player.LEFT = false;
-        // this.currentShape.worldCol += player.speed;
       }
-      if (player.RIGHT && map[wRow][wCol + 1] == 1) {
-        console.log("wep")
+
+      if (player.RIGHT && map[wRow][wCol + 1] == 1
+        || player.RIGHT && map[wRow + 1][wCol + 1] == 1
+      ) {
         this.currentShape.printShape()
         player.RIGHT = false;
-        // this.currentShape.worldCol += player.speed;
       }
     }
 

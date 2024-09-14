@@ -40,14 +40,6 @@ export class Canvas {
         } else {
           cols.push(0);
         }
-        // cols.push(0);
-        // crazy stuff 
-        // if (row > 30) {
-        //   cols.push(Math.trunc(Math.random() * 5));
-        //   continue;
-        // } else {
-        //   cols.push(0);
-        // }
       }
       this.map.push(cols)
     }
