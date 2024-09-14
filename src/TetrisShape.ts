@@ -12,16 +12,18 @@ export const L_SHAPE: number[][] = [
 ]
 
 export const STUPID_SHAPE: number[][] = [
-  [0, 0, 0],
-  [0, 1, 1],
-  [1, 1, 0],
-  [0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 1, 1, 0],
+  [0, 1, 1, 0, 0],
+  [0, 0, 0, 0, 0],
 ]
 
 export const PENIS_SHAPE: number[][] = [
-  [0, 1, 0],
-  [0, 1, 1],
-  [0, 1, 0],
+  [0, 0, 0, 0],
+  [0, 1, 0, 0],
+  [0, 1, 1, 0],
+  [0, 1, 0, 0],
+  [0, 0, 0, 0],
 ]
 
 export const SQUARE_SHAPE: number[][] = [
@@ -78,7 +80,7 @@ export class TetrisShape {
     this.x = x;
     this.y = y;
     this.worldRow = 0
-    this.worldCol = 3
+    this.worldCol = 10
     this.shapeMatrix = shapeMatrix;
     this.color = color;
     this.uwuntu = uwuntu;
@@ -282,7 +284,19 @@ export class TetrisShape {
         }
       }
     }
+    console.log(vertices)
+    this.printShape()
     this.vertices = vertices;
+  }
+  printShape(): void {
+    let mstr = "";
+    for (let i = 0; i < this.shapeMatrix.length; i++) {
+      for (let j = 0; j < this.shapeMatrix[0].length; j++) {
+        mstr += `[${this.shapeMatrix[i][j]}]`
+      }
+      mstr += `\n`
+    }
+    console.log(mstr)
   }
 
 }

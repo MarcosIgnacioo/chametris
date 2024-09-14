@@ -5,6 +5,7 @@ import { TetrisShape, L_SHAPE, SQUARE_SHAPE, STUPID_SHAPE, PENIS_SHAPE, GODS_SHA
 export class Game {
 
   public canvas: Canvas;
+  public deltaTime: number;
   public isPlacing: boolean;
   public tetrisShapes: TetrisShape[];
   public shapes: TetrisShape[];
@@ -65,12 +66,17 @@ export class Game {
   }
 
   update = () => {
+    if (this.deltaTime < 60) {
+      this.deltaTime++
+    } else {
+      this.deltaTime = 0;
+    }
     if (player.UP) {
       this.tetrisShapes[0].y -= player.speed;
     }
     if (player.DOWN) {
       player.DOWN = false;
-      this.goDown()
+      this.instantDown()
       this.canvas.placeInWorld(this.currentShape);
       this.currentShape = null;
       // this.PAIN(this.currentShape, 0)
@@ -96,10 +102,13 @@ export class Game {
     if (this.currentShape === null) {
       this.currentShape = this.generateRandomShape()
     }
+    this.goDown()
+
   }
 
-  goDown() {
+  instantDown() {
     const vertices = this.currentShape.vertices;
+    console.log(vertices)
     const map = this.canvas.map
     const currRow = this.currentShape.worldRow;
     let rowsToMove: number = 0;
@@ -124,30 +133,31 @@ export class Game {
     this.currentShape.worldRow += rowsToMove - 1
   }
 
-  XD() {
-    const extremes = []
-    for (let r = 0; r < this.currentShape.shapeMatrix.length; r++) {
-      for (let c = 0; c < this.currentShape.shapeMatrix[0].length; c++) {
-        if (this.currentShape.shapeMatrix[r][c] == 1 && (this.currentShape.shapeMatrix[r + 1] == undefined || this.currentShape.shapeMatrix[r + 1][c] == 0)) {
-          extremes.push({ row: r, col: c })
-        }
-      }
-    }
+  goDown() {
+    const vertices = this.currentShape.vertices;
     const map = this.canvas.map
-    let increment = 1;
-    for (let i = 0; i < extremes.length; i++) {
-      const vect = extremes[i]
+    const currRow = this.currentShape.worldRow;
+    if (map[currRow + 1] == undefined) {
+      return;
+    }
+    let increment = true;
+    for (let i = 0; i < vertices.length; i++) {
+      const vect = vertices[i]
       const { wRow, wCol } = this.localToWorld(this.currentShape, vect.row, vect.col)
       if (map[wRow + 1][wCol] == 1) {
-        console.log("og", vect.row, vect.col)
-        console.log("shape~~", this.currentShape.worldRow, this.currentShape.worldCol)
-        console.log("world~~", wRow, wCol)
-        increment = 0;
+        increment = false;
+        break;
       }
     }
-    this.currentShape.worldRow += increment
-    console.log(extremes)
-    console.log(this.currentShape.worldRow)
+
+    if (!increment) {
+      this.canvas.placeInWorld(this.currentShape);
+      this.currentShape = null;
+      return;
+    } else if (this.deltaTime % 3 == 0 && increment) {
+      this.currentShape.worldRow++
+    }
+
   }
 
   localToWorldle(wRow: number, wCol: number, row: number, col: number) {
@@ -177,16 +187,16 @@ export class Game {
     const whichShape = Math.trunc(Math.random() * 5)
     switch (whichShape) {
       case 0:
-        shape = new TetrisShape(0, 0, PENIS_SHAPE, "red", ".|.")
+        shape = new TetrisShape(0, 0, STUPID_SHAPE, "orange", "_-")
         break;
       case 1:
         shape = new TetrisShape(0, 0, GODS_SHAPE, "YELLOW", "|")
         break;
       case 2:
-        shape = new TetrisShape(0, 0, STUPID_SHAPE, "orange", "_-")
+        shape = new TetrisShape(0, 0, PENIS_SHAPE, "red", ".|.")
         break;
       case 3:
-        shape = new TetrisShape(0, 0, PENIS_SHAPE, "red", ".|.")
+        shape = new TetrisShape(0, 0, SQUARE_SHAPE, "pink", "[]")
         break;
       case 4:
         shape = new TetrisShape(0, 0, L_SHAPE, "blue", "L")
