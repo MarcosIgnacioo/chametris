@@ -84,7 +84,6 @@ export class Canvas {
       for (let col = 0, wCol = 0; col < + matrix[0].length; col++, wCol++) {
         if (matrix[row][col] == 1) {
           this.drawRect(wCol * SQUARE_SIZE + (tetrisShape.worldCol * SQUARE_SIZE), wRow * SQUARE_SIZE + (tetrisShape.worldRow * SQUARE_SIZE), SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
-          // this.drawRect(wCol * SQUARE_SIZE + (tetrisShape.worldCol * SQUARE_SIZE), wRow * SQUARE_SIZE + (tetrisShape.worldRow * SQUARE_SIZE), SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
         }
       }
     }
@@ -99,13 +98,6 @@ export class Canvas {
         }
       }
     }
-    // for (let row = 0; row < matrix.length; row++) {
-    //   for (let col = 0; col < matrix[0].length; col++) {
-    //     if (matrix[row][col] == 1) {
-    //       this.map[tetrisShape.worldRow + row][tetrisShape.worldCol + col] = 1;
-    //     }
-    //   }
-    // }
   }
 
   drawCircle(x: number, y: number, radius: number, color: string) {

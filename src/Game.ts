@@ -67,15 +67,16 @@ export class Game {
   }
 
   update = () => {
-    if (this.deltaTime < 60) {
+
+    if (this.currentShape) {
+      this.goDown()
+    }
+    if (this.deltaTime < 15) {
       this.deltaTime++
     } else {
       this.deltaTime = 0;
     }
 
-    if (this.currentShape) {
-      this.goDown()
-    }
 
     if (player.UP) {
       this.tetrisShapes[0].y -= player.speed;
@@ -173,11 +174,12 @@ export class Game {
       }
     }
 
+    console.log(this.deltaTime)
     if (!increment) {
       this.canvas.placeInWorld(this.currentShape);
       this.currentShape = null;
       return;
-    } else if (this.deltaTime % 3 == 0 && increment) {
+    } else if (this.deltaTime == 0) {
       this.currentShape.worldRow++
     }
 
