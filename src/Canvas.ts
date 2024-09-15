@@ -85,6 +85,7 @@ export class Canvas {
         if (matrix[row][col] == 1) {
           this.drawRect(wCol * SQUARE_SIZE + (tetrisShape.worldCol * SQUARE_SIZE), wRow * SQUARE_SIZE + (tetrisShape.worldRow * SQUARE_SIZE), SQUARE_SIZE, SQUARE_SIZE, tetrisShape.color)
         }
+
       }
     }
   }

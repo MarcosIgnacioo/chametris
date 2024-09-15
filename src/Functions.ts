@@ -1,4 +1,5 @@
 import { SQUARE_SIZE } from "./Globals";
+import { TetrisShape } from "./TetrisShape";
 
 export function worldToScreen(num: number) {
   return Math.round(num * SQUARE_SIZE);
@@ -29,4 +30,12 @@ export function rgb() {
 }
 export function deltaTime(dt: number): number {
   return (dt < 15) ? dt + 1 : 0
+}
+
+export function localToWorldle(wRow: number, wCol: number, row: number, col: number) {
+  return { wRow: wRow + row, wCol: wCol + col }
+}
+
+export function localToWorld(tetrisShape: TetrisShape, row: number, col: number) {
+  return { wRow: tetrisShape.worldRow + row, wCol: tetrisShape.worldCol + col }
 }

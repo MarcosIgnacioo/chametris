@@ -63,30 +63,26 @@ export class TetrisShape {
   public pixels: number;
   public startRow: number;
   public startCol: number;
-  public uwuntu: string;
+  public shapeNumber: number;
   public vertices: Vertices[];
   public leftVertices: Vertices[];
   public rightVertices: Vertices[];
 
-  public shapesForm: TetrisUnit[];
-  public shapeMatrix: number[][];
-  public gravity: number;
   public worldRow: number;
   public worldCol: number;
-  public maxRow: number;
-  public screenX: number;
-  public screenY: number;
-  public pivotX: number;
-  public pivotY: number;
 
-  constructor(x: number, y: number, shapeMatrix: number[][], color: string, uwuntu: string) {
+  public shapeMatrix: number[][];
+  public gravity: number;
+
+
+  constructor(x: number, y: number, shapeMatrix: number[][], color: string, shapeNumber: number) {
     this.x = x;
     this.y = y;
     this.worldRow = 0
     this.worldCol = 10
     this.shapeMatrix = shapeMatrix;
     this.color = color;
-    this.uwuntu = uwuntu;
+    this.shapeNumber = shapeNumber
     this.initShape();
   }
 
@@ -144,14 +140,12 @@ export class TetrisShape {
     this.startRow = startRow;
     this.startCol = startCol;
     this.shapeVertices()
-    this.shapeLeftVertices()
-    // this.shapeRightVertices()
   }
 
   isColliding(m: number[][], map: number[][], wR: number, wC: number): boolean {
     for (let row = 0, wwR = wR; row < m.length; row++, wwR++) {
       for (let col = 0, wwC = wC; col < m[0].length; col++, wwC++) {
-        if (m[row][col] == 1 && map[wwR][wwC] == 1) {
+        if (m[row][col] > 0 && map[wwR][wwC] > 0) {
           return true;
         }
       }
@@ -185,40 +179,6 @@ export class TetrisShape {
     this.initShape()
   }
 
-  shapeLeftVertices(): void {
-    const vertices: Vertices[] = []
-    let foundLeftMostCol = false;
-    for (let r = 0; r < this.shapeMatrix.length; r++) {
-      for (let c = 0; c < this.shapeMatrix[0].length; c++) {
-        if (this.shapeMatrix[r][c] == 1) {
-          foundLeftMostCol = true;
-          vertices.push(({ row: r, col: c }) as Vertices)
-        }
-      }
-      if (foundLeftMostCol) {
-        break;
-      }
-    }
-    this.leftVertices = vertices;
-  }
-
-  shapeRightVertices(): void {
-    const vertices: Vertices[] = []
-    let rightMostCol = this.shapeMatrix[0].length;
-    let foundRightMostCol = false;
-    for (let r = 0; r < this.shapeMatrix.length; r++) {
-      for (let c = rightMostCol; c >= 0; c--) {
-        if (this.shapeMatrix[r][c] == 1) {
-          foundRightMostCol = true;
-          vertices.push(({ row: r, col: c }) as Vertices)
-        }
-      }
-      if (foundRightMostCol) {
-        break;
-      }
-    }
-    this.leftVertices = vertices;
-  }
 
   shapeVertices(): void {
     const vertices: Vertices[] = []
@@ -234,20 +194,6 @@ export class TetrisShape {
     this.vertices = vertices;
   }
 
-  shapeGetLeftMostVertices(): Vertices[] {
-    let prevCol = Infinity;
-    const leftMost: Vertices[] = []
-    for (let i = 0; i < this.vertices.length; i++) {
-      if (this.vertices[i].col < prevCol) {
-        leftMost.pop()
-      }
-      if (this.vertices[i].col <= prevCol) {
-        leftMost.push(this.vertices[i])
-        prevCol = this.vertices[i].col;
-      }
-    }
-    return leftMost
-  }
   printShape(): void {
     let mstr = "";
     for (let i = 0; i < this.shapeMatrix.length; i++) {

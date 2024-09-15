@@ -1,6 +1,6 @@
 import { Canvas } from "./Canvas";
-import { c_is_better2, deltaTime } from "./Functions";
-import { canvas, GRAVITY, player, SQUARE_SIZE, square_test } from "./Globals";
+import { c_is_better2, deltaTime, localToWorld, localToWorldle } from "./Functions";
+import { canvas, COLORS, GRAVITY, player, SQUARE_SIZE, square_test } from "./Globals";
 import { TetrisShape, L_SHAPE, SQUARE_SHAPE, STUPID_SHAPE, PENIS_SHAPE, GODS_SHAPE } from "./TetrisShape";
 export class Game {
 
@@ -15,11 +15,6 @@ export class Game {
   constructor(canvas: Canvas) {
     this.canvas = canvas;
     this.tetrisShapes = []
-    // this.tetrisShapes.push(new TetrisShape(0, 0, L_SHAPE, "blue"))
-    // this.tetrisShapes.push(new TetrisShape(0, 60, SQUARE_SHAPE, "pink"))
-    // this.tetrisShapes.push(new TetrisShape(0, 200, STUPID_SHAPE, "orange"))
-    // this.tetrisShapes.push(new TetrisShape(200, 200, PENIS_SHAPE, "red"))
-    // this.tetrisShapes.push(new TetrisShape(500, 60, GODS_SHAPE, "YELLOW"))
     this.isShapeDown = true;
     this.currentShape = null;
   }
@@ -44,9 +39,13 @@ export class Game {
 
     for (let row = 0; row < map.length; row++) {
       for (let col = 0; col < map[0].length; col++) {
-        if (map[row][col] == 1) {
-          canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "white");
-          canvas.context.strokeRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        // if (map[row][col] == 2) {
+        //   canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "white");
+        //   canvas.context.strokeRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        // }
+        const squareInScreen = map[row][col];
+        if (squareInScreen > 0) {
+          canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, COLORS[squareInScreen]);
         }
         // if (map[row][col] == 2) {
         //   canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "red");
@@ -67,7 +66,6 @@ export class Game {
   }
 
   update = () => {
-
     if (this.currentShape) {
       this.goDown()
     }
@@ -85,7 +83,8 @@ export class Game {
     if (player.DOWN) {
       player.DOWN = false;
       this.instantDown()
-      this.canvas.placeInWorld(this.currentShape);
+      this.updateWorld()
+      // this.canvas.placeInWorld(this.currentShape);
       this.currentShape = null;
     }
 
@@ -142,8 +141,8 @@ export class Game {
     for (let mRow = currRow; mRow < map.length; mRow++) {
       for (let i = 0; i < vertices.length; i++) {
         const vertex = vertices[i]
-        const { wRow, wCol } = this.localToWorldle(worldRow, worldCol, vertex.row, vertex.col)
-        if (map[wRow + 1][wCol] == 1) {
+        const { wRow, wCol } = localToWorldle(worldRow, worldCol, vertex.row, vertex.col)
+        if (map[wRow + 1][wCol] != 0) {
           mRow = Infinity;
           break;
         }
@@ -164,20 +163,20 @@ export class Game {
     let increment = true;
     for (let i = 0; i < vertices.length; i++) {
       const vect = vertices[i]
-      const { wRow, wCol } = this.localToWorld(this.currentShape, vect.row, vect.col)
+      const { wRow, wCol } = localToWorld(this.currentShape, vect.row, vect.col)
 
-      if (map[wRow][wCol] == 1) {
+      if (map[wRow][wCol] != 0) {
         increment = false;
         break;
       }
-
-      if (map[wRow + 1][wCol] == 1) {
+      if (map[wRow + 1][wCol] != 0) {
         increment = false;
         break;
       }
     }
     if (!increment) {
-      this.canvas.placeInWorld(this.currentShape);
+      this.updateWorld()
+      // this.canvas.placeInWorld(this.currentShape);
       this.currentShape = null;
       return;
     } else if (this.deltaTime == 0) {
@@ -186,60 +185,49 @@ export class Game {
 
   }
 
-  localToWorldle(wRow: number, wCol: number, row: number, col: number) {
-    return { wRow: wRow + row, wCol: wCol + col }
-  }
 
-  localToWorld(tetrisShape: TetrisShape, row: number, col: number) {
-    return { wRow: tetrisShape.worldRow + row, wCol: tetrisShape.worldCol + col }
-  }
-
-  shadow() {
-    for (let i = 0; i < this.canvas.map.length; i++) {
-      for (let j = 0; j < this.canvas.map[0].length; j++) {
-        if (this.canvas.map[i][j] == 2) {
-          this.canvas.map[i][j] = 0
-        }
-      }
-    }
-    let shadow = { ... this.currentShape }
-    shadow.worldRow = this.getHighestRowPossible(shadow.worldCol, true)
-    this.canvas.placeInWorld(shadow as TetrisShape, 2);
-  }
 
   // caveman afff
   generateRandomShape(): TetrisShape {
     let shape: TetrisShape;
     const whichShape = Math.trunc(Math.random() * 5)
+    const color = COLORS[whichShape + 2]
+    console.log(color)
     switch (whichShape) {
       case 0:
-        shape = new TetrisShape(0, 0, STUPID_SHAPE, "orange", "_-")
+        shape = new TetrisShape(0, 0, STUPID_SHAPE, color, 2)
         break;
       case 1:
-        shape = new TetrisShape(0, 0, GODS_SHAPE, "YELLOW", "|")
+        shape = new TetrisShape(0, 0, GODS_SHAPE, color, 3)
         break;
       case 2:
-        shape = new TetrisShape(0, 0, PENIS_SHAPE, "red", ".|.")
+        shape = new TetrisShape(0, 0, PENIS_SHAPE, color, 4)
         break;
       case 3:
-        shape = new TetrisShape(0, 0, SQUARE_SHAPE, "pink", "[]")
+        shape = new TetrisShape(0, 0, SQUARE_SHAPE, color, 5)
         break;
       case 4:
-        shape = new TetrisShape(0, 0, L_SHAPE, "blue", "L")
+        shape = new TetrisShape(0, 0, L_SHAPE, color, 6)
         break;
     }
     return shape
   }
 
+
+  placeInWorld(tetrisShape: TetrisShape, blockValue: number = 1) {
+
+  }
   updateWorld() {
+
     const currentShape = this.currentShape;
+    const { worldRow, worldCol } = currentShape;
     const worldMap = this.canvas.map
-    const maxRow = currentShape.worldRow + currentShape.height
-    const maxCol = currentShape.worldCol + currentShape.shapeMatrix[0].length
-    for (let wRow = currentShape.worldRow, sRow = 0; wRow < maxRow; wRow++) {
-      for (let wCol = currentShape.worldCol, sCol = 0; wCol < maxCol; wCol++) {
-        if (currentShape.shapeMatrix[sRow][sCol] == 1) {
-          worldMap[wRow][wCol] = 1;
+    const matrix = currentShape.shapeMatrix;
+
+    for (let row = 0, wRow = 0; row < matrix.length; row++, wRow++) {
+      for (let col = 0, wCol = 0; col < matrix[0].length; col++, wCol++) {
+        if (matrix[row][col] == 1) {
+          worldMap[worldRow + wRow][worldCol + wCol] = currentShape.shapeNumber;
         }
       }
     }
