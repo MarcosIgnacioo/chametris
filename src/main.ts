@@ -33,6 +33,9 @@ document.addEventListener("keydown", (e) => {
     case "r":
       player.ROTATE = true;
       break;
+    case "Escape":
+      player.PAUSE = !player.PAUSE;
+      break;
   }
 });
 

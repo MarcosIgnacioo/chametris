@@ -1,6 +1,6 @@
 import { Canvas } from "./Canvas";
-import { c_is_better2, deltaTime, localToWorld, localToWorldle } from "./Functions";
-import { canvas, COLORS, GRAVITY, player, SQUARE_SIZE, square_test } from "./Globals";
+import { c_is_better, c_is_better2, deltaTime, localToWorld, localToWorldle } from "./Functions";
+import { canvas, COLORS, GRAVITY, player, SQUARE_SIZE } from "./Globals";
 import { TetrisShape, L_SHAPE, SQUARE_SHAPE, STUPID_SHAPE, PENIS_SHAPE, GODS_SHAPE } from "./TetrisShape";
 export class Game {
 
@@ -24,64 +24,29 @@ export class Game {
     const canvas = this.canvas;
     const map = this.canvas.map;
     canvas.clearScreen();
-    for (let row = 0; row < map.length; row++) {
-      for (let col = 0; col < map[0].length; col++) {
-        const color = ((row + (c_is_better2(col % 2 == 0))) % 2 == 0) ? "gray" : "black"
-        canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, color);
-        if (row === 0) {
-        }
-      }
-    }
-
-    if (this.currentShape) {
-      const shadow: TetrisShape = { ... this.currentShape } as TetrisShape
-      shadow.color = COLORS[7]
-      canvas.drawTetrisShape(this.currentShape);
-      shadow.worldRow = this.currentShape.getLowestRow(map) - 1
-      canvas.drawTetrisShape(shadow);
-    }
-
-    for (let row = 0; row < map.length; row++) {
-      for (let col = 0; col < map[0].length; col++) {
-        // if (map[row][col] == 2) {
-        //   canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "white");
-        //   canvas.context.strokeRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
-        // }
-        const squareInScreen = map[row][col];
-        if (squareInScreen > 0) {
-          canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, COLORS[squareInScreen]);
-        }
-        // if (map[row][col] == 2) {
-        //   canvas.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, "red");
-        // }
-      }
-    }
-    // this.tetrisShapes.forEach(shape => {
-    //   canvas.drawTetrisShape(shape);
-    // });
-    this.update()
-    for (let col = 0; col < map[0].length; col++) {
-      canvas.drawTextWhere(`c:${col}`, col * SQUARE_SIZE, 10)
-    }
-    for (let row = 0; row < map.length; row++) {
-      canvas.drawTextWhere(`r:${row}`, 1, row * SQUARE_SIZE + 20)
+    canvas.drawTextWhere(`pountso${player.points}`, canvas.width - 100, 10)
+    canvas.drawMap()
+    canvas.drawFallingPieceAndShadow(this.currentShape)
+    canvas.debug()
+    if (!player.PAUSE) {
+      this.update()
     }
     requestAnimationFrame(this.paint)
   }
 
   update = () => {
+    const map = this.canvas.map
+
     if (this.currentShape) {
       this.goDown()
     }
 
     this.deltaTime = deltaTime(this.deltaTime);
 
-    const map = this.canvas.map
 
     if (this.currentShape === null) {
       this.currentShape = this.generateRandomShape()
     }
-
 
     const { shapeMatrix, worldRow, worldCol } = this.currentShape;
 
@@ -92,23 +57,31 @@ export class Game {
       this.currentShape = null;
     }
 
-    if (player.LEFT && this.currentShape) {
+    if (!this.currentShape) {
+      return;
+    }
+
+    if (player.LEFT) {
       const collides = this.currentShape.isColliding(shapeMatrix, map, worldRow, worldCol - 1)
       if (!collides) {
         this.currentShape.worldCol -= 1;
       }
-      player.LEFT = false
+      if (this.deltaTime < 15) {
+        player.LEFT = false
+      }
     }
 
-    if (player.RIGHT && this.currentShape) {
+    if (player.RIGHT) {
       const collides = this.currentShape.isColliding(shapeMatrix, map, worldRow, worldCol + 1)
       if (!collides) {
         this.currentShape.worldCol += 1;
       }
-      player.RIGHT = false
+      if (this.deltaTime < 15) {
+        player.RIGHT = false
+      }
     }
 
-    if (player.UP && this.currentShape) {
+    if (player.UP) {
       const collides = this.currentShape.isColliding(shapeMatrix, map, worldRow - 1, worldCol)
       if (!collides) {
         this.currentShape.worldRow -= 1;
@@ -116,7 +89,7 @@ export class Game {
       player.UP = false
     }
 
-    if (player.DOWNa && this.currentShape) {
+    if (player.DOWNa) {
       const collides = this.currentShape.isColliding(shapeMatrix, map, worldRow + 1, worldCol)
       if (!collides) {
         this.currentShape.worldRow += 1;
@@ -124,17 +97,11 @@ export class Game {
       player.DOWNa = false
     }
 
-    if (player.ROTATE && this.currentShape) {
+    if (player.ROTATE) {
       this.currentShape.rotate(map)
       player.ROTATE = false
     }
 
-  }
-
-  shadow() {
-    const currentShape = this.currentShape;
-    const map = this.canvas.map
-    console.log(currentShape.getLowestRow(map))
   }
 
   // we leave this here because he is a friend :D
@@ -187,7 +154,6 @@ export class Game {
     }
     if (!increment) {
       this.updateWorld()
-      // this.canvas.placeInWorld(this.currentShape);
       this.currentShape = null;
       return;
     } else if (this.deltaTime == 0) {
@@ -201,7 +167,7 @@ export class Game {
   // caveman afff
   generateRandomShape(): TetrisShape {
     let shape: TetrisShape;
-    const whichShape = Math.trunc(Math.random() * 5)
+    const whichShape = 3;
     const color = COLORS[whichShape + 2]
     switch (whichShape) {
       case 0:
@@ -224,16 +190,11 @@ export class Game {
   }
 
 
-  placeInWorld(tetrisShape: TetrisShape, blockValue: number = 1) {
-
-  }
   updateWorld() {
-
     const currentShape = this.currentShape;
     const { worldRow, worldCol } = currentShape;
     const worldMap = this.canvas.map
     const matrix = currentShape.shapeMatrix;
-
     for (let row = 0, wRow = 0; row < matrix.length; row++, wRow++) {
       for (let col = 0, wCol = 0; col < matrix[0].length; col++, wCol++) {
         if (matrix[row][col] == 1) {
@@ -241,43 +202,77 @@ export class Game {
         }
       }
     }
+
+    // la base pues la mandamos a la ergg
+    let colsFilled = 0;
+    let rowsFilled = 0;
+    const rowsToRemove = []
+    for (let row = 0; row < worldMap.length - 1; row++) {
+      for (let col = 0; col < worldMap[0].length; col++) {
+        if (worldMap[row][col] > 1) {
+          colsFilled++
+        }
+        if (colsFilled >= worldMap[0].length) {
+          worldMap[row].fill(0);
+        }
+      }
+      if (colsFilled < worldMap[0].length) {
+        colsFilled = 0;
+        continue;
+      }
+      rowsFilled++;
+      rowsToRemove.push(row)
+    }
+
+    if (!rowsToRemove.length) {
+      return;
+    }
+
+
+    const lowestRow = rowsToRemove.reduce((p, c) => c_is_better2(p > c) * p + c_is_better2(c > p) * c)
+
+    for (let row = lowestRow; row > 10; row--) {
+      const highestRow = this.getHighestRowPossible(worldMap, row)
+      for (let col = 0; col < worldMap[0].length; col++) {
+        worldMap[highestRow][col] = worldMap[row][col];
+        worldMap[row][col] = 0
+      }
+    }
+
+    for (let p = 1; p <= rowsFilled; p++) {
+      player.points += 100 * p
+    }
+
+    for (let row = 0; row < worldMap.length - 1; row++) {
+      for (let col = 0; col < worldMap[0].length; col++) {
+        if (worldMap[row][col] > 1) {
+          colsFilled++
+        }
+      }
+    }
   }
 
+
+  nRandom(n: number) {
+    return Math.trunc(Math.random() * n)
+  }
 
   random() {
     return Math.trunc(Math.random() * 30)
   }
 
-  getHighestRowPossiblev2(shapeCol: number) {
-    const map = this.canvas.map
-    const shapeWidth = this.currentShape.width;
-    let mstr = "";
-    let row = 0
-    let retRow = 0;
-    // for (; row < this.canvas.totalRows; row++) {
-    //   for (let col = shapeCol; col < shapeCol + this.currentShape.shapeMatrix[0].length; col++) {
-    //     mstr += `[${map[row][col]}]`
-    //   }
-    //   mstr += `\n`
-    // }
-    return this.random();
-  }
-
-  getHighestRowPossible(shapeCol: number, isShadow = false) {
-    const map = this.canvas.map
-    const shapeWidth = this.currentShape.width;
-    const shapeHeight = this.currentShape.height;
-    const name = this.currentShape.uwuntu
-    let row = 0
-    for (; row < this.canvas.totalRows; row++) {
-      for (let col = shapeCol; col < shapeCol + shapeWidth; col++) {
-        if (map[row][col] == 1) {
-          return row - shapeHeight;
+  getHighestRowPossible(map: number[][], pivotRow: number) {
+    let row = pivotRow + 1;
+    for (; row < map.length; row++) {
+      for (let col = 0; col < map[0].length; col++) {
+        if (map[row][col] > 0) {
+          return row - 1;
         }
       }
     }
-    return row - shapeHeight;
+    return row - 1
   }
+
 
   PAIN(tetrisShape: TetrisShape, pivotRow: number): number {
 

@@ -1,10 +1,7 @@
 import { Canvas } from "./Canvas";
 
-const htmlCanvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("game-canvas");
-const htmlContext: CanvasRenderingContext2D = htmlCanvas.getContext("2d");
-export const canvas: Canvas = new Canvas(htmlCanvas, htmlContext);
-export const GRAVITY: number = 0.3;
 export const SQUARE_SIZE: number = 24;
+export const GRAVITY: number = 0.3;
 export const player = {
   LEFT: false,
   RIGHT: false,
@@ -12,7 +9,9 @@ export const player = {
   DOWN: false,
   DOWNa: false,
   ROTATE: false,
+  PAUSE: false,
   speed: 1,
+  points: 0,
 }
 
 export const COLORS: string[] = [
@@ -26,11 +25,6 @@ export const COLORS: string[] = [
   "rgba(247, 31, 168, 0.50)", // shadow 7
 ]
 
-export const square_test = [
-  [
-    1, 1
-  ],
-  [
-    1, 1
-  ]
-]
+const htmlCanvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("game-canvas");
+const htmlContext: CanvasRenderingContext2D = htmlCanvas.getContext("2d");
+export const canvas: Canvas = new Canvas(htmlCanvas, htmlContext);

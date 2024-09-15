@@ -18,6 +18,9 @@
 //       mCol++;
 //     }
 //     mRow++;
+
+import { TetrisShape } from "./TetrisShape";
+
 //   }
 for (let mRow = 0; mRow < this.shapeMatrix.length; mRow++) {
   for (let mCol = 0; mCol < this.shapeMatrix[0].length; mCol++) {
@@ -53,4 +56,13 @@ shadow() {
   let shadow = { ... this.currentShape }
   shadow.worldRow = this.getHighestRowPossible(shadow.worldCol, true)
   this.canvas.placeInWorld(shadow as TetrisShape, 2);
+}
+
+for (let row = 0; row < rowsToRemove.length; row++) {
+  const rowToRemove = rowsToRemove[row]
+  for (let col = 0; col < worldMap[0].length; col++) {
+    worldMap[rowToRemove][col] = 0;
+    worldMap[rowToRemove][col] = worldMap[rowToRemove - 1][col];
+    worldMap[rowToRemove - 1][col] = 0;
+  }
 }

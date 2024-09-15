@@ -143,6 +143,9 @@ export class TetrisShape {
   }
 
   isColliding(m: number[][], map: number[][], wR: number, wC: number): boolean {
+    if (wR < 0 || wR >= map.length || wC < 0 || wC >= map[0].length - 1) {
+      return true
+    }
     for (let row = 0, wwR = wR; row < m.length; row++, wwR++) {
       for (let col = 0, wwC = wC; col < m[0].length; col++, wwC++) {
         if (m[row][col] > 0 && map[wwR][wwC] > 0) {
@@ -200,8 +203,6 @@ export class TetrisShape {
         }
       }
     }
-    // console.log(vertices)
-    this.printShape()
     this.vertices = vertices;
   }
 

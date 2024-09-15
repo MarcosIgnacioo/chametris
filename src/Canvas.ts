@@ -1,4 +1,5 @@
-import { SQUARE_SIZE, square_test } from "./Globals";
+import { c_is_better2 } from "./Functions";
+import { COLORS, SQUARE_SIZE } from "./Globals";
 import { TetrisShape } from "./TetrisShape";
 
 export class Canvas {
@@ -21,10 +22,10 @@ export class Canvas {
     this.context.imageSmoothingEnabled = false;
     this.width = canvas.width;
     this.height = canvas.height;
-    this.worldOriginX = this.width / 2;
-    this.worldOriginY = this.height / 2;
-    this.totalRows = 40;
-    this.totalCols = 25;
+    this.totalRows = 24;
+    this.totalCols = 16;
+    this.worldOriginX = this.width / 2 + this.totalCols / 2 * SQUARE_SIZE;
+    this.worldOriginY = this.height / 2 + this.totalRows / 2 * SQUARE_SIZE;
     this.map = [];
     this.initMap();
   }
@@ -35,25 +36,21 @@ export class Canvas {
       for (let col = 0; col < this.totalCols; col++) {
         if (row == this.totalRows - 1) {
           cols.push(1)
-        } else if (row % 2 == 1 && col % 2 == 1 && (col < 8 || col >= 20)) {
-          cols.push(1);
         } else {
           cols.push(0);
         }
       }
       this.map.push(cols)
     }
-    this.map[39][0] = 1
-    this.map[39][0] = 1
-    this.map[39][1] = 1
-    this.map[39][2] = 1
-    this.map[39][3] = 1
-    this.map[39][4] = 1
-    this.map[38][4] = 1
-    this.map[38][3] = 1
-    this.map[38][4] = 0
-    this.map[38][5] = 1
-    this.map[38][6] = 1
+
+    const asdf = this.map.length - 2
+    for (let i = 0; i < this.map[0].length - 2; i++) {
+      this.map[asdf][i] = 2;
+      this.map[asdf - 1][i] = 2;
+      this.map[asdf - 2][i] = 2;
+      this.map[asdf - 3][i] = 2;
+      this.map[asdf - 4][i] = 2;
+    }
   }
 
   drawRect(x: number, y: number, width: number, height: number, color: string) {
@@ -76,10 +73,35 @@ export class Canvas {
     ctx.clearRect(0, 0, this.width, this.height);
   }
 
+  drawMap() {
+    const map = this.map
+    for (let row = 0; row < map.length; row++) {
+      for (let col = 0; col < map[0].length; col++) {
+        const color = ((row + (c_is_better2(col % 2 == 0))) % 2 == 0) ? "gray" : "black"
+        this.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, color);
+        const squareInScreen = map[row][col];
+        if (squareInScreen > 0) {
+          this.drawRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE, COLORS[squareInScreen]);
+        }
+      }
+    }
+  }
+
+  drawFallingPieceAndShadow(currentShape: TetrisShape) {
+    if (!currentShape) {
+      return;
+    }
+    const map = this.map
+    const shadow: TetrisShape = { ...currentShape } as TetrisShape
+    shadow.color = COLORS[7]
+    this.drawTetrisShape(currentShape);
+    shadow.worldRow = currentShape.getLowestRow(map) - 1
+    this.drawTetrisShape(shadow);
+  }
+
 
   drawTetrisShape(tetrisShape: TetrisShape) {
     const matrix = tetrisShape.shapeMatrix;
-    const { startRow, startCol } = tetrisShape;
     for (let row = 0, wRow = 0; row < + matrix.length; row++, wRow++) {
       for (let col = 0, wCol = 0; col < + matrix[0].length; col++, wCol++) {
         if (matrix[row][col] == 1) {
@@ -87,6 +109,15 @@ export class Canvas {
         }
 
       }
+    }
+  }
+  debug() {
+    const map = this.map
+    for (let col = 0; col < map[0].length; col++) {
+      this.drawTextWhere(`c:${col}`, col * SQUARE_SIZE, 10)
+    }
+    for (let row = 0; row < map.length; row++) {
+      this.drawTextWhere(`r:${row}`, 1, row * SQUARE_SIZE + 20)
     }
   }
 
