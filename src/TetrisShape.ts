@@ -152,6 +152,17 @@ export class TetrisShape {
     }
   }
 
+  getLowestRow(map: number[][]) {
+    const shapeMatrix = this.shapeMatrix
+    let row = this.worldRow
+    for (; row < map.length; row++) {
+      if (this.isColliding(shapeMatrix, map, row, this.worldCol)) {
+        break;
+      }
+    }
+    return row;
+  }
+
   rotate(map: number[][]) {
     const matrix = this.shapeMatrix.map(function(arr) {
       return arr.slice();

@@ -34,7 +34,11 @@ export class Game {
     }
 
     if (this.currentShape) {
+      const shadow: TetrisShape = { ... this.currentShape } as TetrisShape
+      shadow.color = COLORS[7]
       canvas.drawTetrisShape(this.currentShape);
+      shadow.worldRow = this.currentShape.getLowestRow(map) - 1
+      canvas.drawTetrisShape(shadow);
     }
 
     for (let row = 0; row < map.length; row++) {
@@ -78,13 +82,13 @@ export class Game {
       this.currentShape = this.generateRandomShape()
     }
 
+
     const { shapeMatrix, worldRow, worldCol } = this.currentShape;
 
     if (player.DOWN) {
       player.DOWN = false;
       this.instantDown()
       this.updateWorld()
-      // this.canvas.placeInWorld(this.currentShape);
       this.currentShape = null;
     }
 
@@ -124,6 +128,13 @@ export class Game {
       this.currentShape.rotate(map)
       player.ROTATE = false
     }
+
+  }
+
+  shadow() {
+    const currentShape = this.currentShape;
+    const map = this.canvas.map
+    console.log(currentShape.getLowestRow(map))
   }
 
   // we leave this here because he is a friend :D
@@ -192,7 +203,6 @@ export class Game {
     let shape: TetrisShape;
     const whichShape = Math.trunc(Math.random() * 5)
     const color = COLORS[whichShape + 2]
-    console.log(color)
     switch (whichShape) {
       case 0:
         shape = new TetrisShape(0, 0, STUPID_SHAPE, color, 2)

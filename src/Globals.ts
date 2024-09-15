@@ -16,13 +16,14 @@ export const player = {
 }
 
 export const COLORS: string[] = [
-  "#29062e", // nil
-  "#302f2d", // bg
-  "#1586e5", // stupid shape 0
-  "#5528e3", // gods shape 1
-  "#f736dd", // penis shape 2
-  "#fcb716", // square shape 3
-  "#97fd6a", // L shape 4
+  "#29062e", // nil 0
+  "#302f2d", // bg 1
+  "#1586e5", // stupid shape 2
+  "#5528e3", // gods shape 3
+  "#f736dd", // penis shape 4
+  "#fcb716", // square shape 5
+  "#97fd6a", // L shape 6
+  "rgba(247, 31, 168, 0.50)", // shadow 7
 ]
 
 export const square_test = [
