@@ -27,3 +27,6 @@ export function rgb() {
   }
   return color;
 }
+export function deltaTime(dt: number): number {
+  return (dt < 15) ? dt + 1 : 0
+}

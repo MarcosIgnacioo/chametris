@@ -1,5 +1,5 @@
 import { Canvas } from "./Canvas";
-import { c_is_better2 } from "./Functions";
+import { c_is_better2, deltaTime } from "./Functions";
 import { canvas, GRAVITY, player, SQUARE_SIZE, square_test } from "./Globals";
 import { TetrisShape, L_SHAPE, SQUARE_SHAPE, STUPID_SHAPE, PENIS_SHAPE, GODS_SHAPE } from "./TetrisShape";
 export class Game {
@@ -72,18 +72,16 @@ export class Game {
       this.goDown()
     }
 
+    this.deltaTime = deltaTime(this.deltaTime);
+
     const map = this.canvas.map
-    if (this.deltaTime < 15) {
-      this.deltaTime++
-    } else {
-      this.deltaTime = 0;
-    }
 
     if (this.currentShape === null) {
       this.currentShape = this.generateRandomShape()
     }
 
     const { shapeMatrix, worldRow, worldCol } = this.currentShape;
+
     if (player.DOWN) {
       player.DOWN = false;
       this.instantDown()
@@ -127,11 +125,9 @@ export class Game {
       this.currentShape.rotate(map)
       player.ROTATE = false
     }
-
-
-
   }
 
+  // we leave this here because he is a friend :D
   instantDown() {
     const vertices = this.currentShape.vertices;
     const map = this.canvas.map
@@ -179,8 +175,6 @@ export class Game {
         increment = false;
         break;
       }
-
-
     }
     if (!increment) {
       this.canvas.placeInWorld(this.currentShape);
