@@ -11,10 +11,23 @@ export const L_SHAPE: number[][] = [
   [0, 1, 1, 0],
 ]
 
+export const L_SHAPE_REVERSED: number[][] = [
+  [0, 0, 1, 0],
+  [0, 0, 1, 0],
+  [0, 1, 1, 0],
+]
+
 export const STUPID_SHAPE: number[][] = [
   [0, 0, 0, 0, 0],
   [0, 0, 1, 1, 0],
   [0, 1, 1, 0, 0],
+  [0, 0, 0, 0, 0],
+]
+
+export const STUPID_SHAPE_REVERSED: number[][] = [
+  [0, 0, 0, 0, 0],
+  [0, 1, 1, 0, 0],
+  [0, 0, 1, 1, 0],
   [0, 0, 0, 0, 0],
 ]
 
@@ -38,20 +51,14 @@ export const GODS_SHAPE: number[][] = [
   [0, 0, 1, 0, 0],
 ]
 
-export class TetrisUnit {
-  public x: number;
-  public y: number;
-  public width: number;
-  public height: number;
-  public color: string;
-  constructor(x: number, y: number, color: string) {
-    this.x = x;
-    this.y = y;
-    this.width = SQUARE_SIZE;
-    this.height = SQUARE_SIZE;
-    this.color = color;
-  }
-}
+export const SHAPES: number[][][] = [];
+SHAPES.push(GODS_SHAPE);
+SHAPES.push(L_SHAPE);
+SHAPES.push(L_SHAPE_REVERSED);
+SHAPES.push(STUPID_SHAPE);
+SHAPES.push(STUPID_SHAPE_REVERSED);
+SHAPES.push(SQUARE_SHAPE);
+SHAPES.push(PENIS_SHAPE);
 
 export class TetrisShape {
 
@@ -143,9 +150,12 @@ export class TetrisShape {
   }
 
   isColliding(m: number[][], map: number[][], wR: number, wC: number): boolean {
-    if (wR < 0 || wR >= map.length || wC < 0 || wC >= map[0].length - 1) {
-      return true
+    const realCol = wC + this.startCol;
+
+    if (realCol < 0 || realCol + this.width - 1 >= map[0].length) {
+      return true;
     }
+
     for (let row = 0, wwR = wR; row < m.length; row++, wwR++) {
       for (let col = 0, wwC = wC; col < m[0].length; col++, wwC++) {
         if (m[row][col] > 0 && map[wwR][wwC] > 0) {

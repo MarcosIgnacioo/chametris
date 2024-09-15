@@ -10,6 +10,10 @@ export const player = {
   DOWNa: false,
   ROTATE: false,
   PAUSE: false,
+  MOVING: false,
+  MS_SINCE_LAST_PRESSED: -Infinity,
+  MS_SINCE_REALESED: -Infinity,
+  LAST_PRESSED_TIME: -Infinity,
   speed: 1,
   points: 0,
 }
@@ -22,7 +26,10 @@ export const COLORS: string[] = [
   "#f736dd", // penis shape 4
   "#fcb716", // square shape 5
   "#97fd6a", // L shape 6
-  "rgba(247, 31, 168, 0.50)", // shadow 7
+  "#7c63e3", // L reversed 7
+  "#685e75", // stupid shape reversed 8
+  "rgba(247, 31, 168, 0.50)", // shadow 9
+  "rgba(247, 31, 168, 0.20)" // shadow colliding 10
 ]
 
 const htmlCanvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("game-canvas");

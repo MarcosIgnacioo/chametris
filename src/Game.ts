@@ -1,7 +1,7 @@
 import { Canvas } from "./Canvas";
 import { c_is_better, c_is_better2, deltaTime, localToWorld, localToWorldle } from "./Functions";
 import { canvas, COLORS, GRAVITY, player, SQUARE_SIZE } from "./Globals";
-import { TetrisShape, L_SHAPE, SQUARE_SHAPE, STUPID_SHAPE, PENIS_SHAPE, GODS_SHAPE } from "./TetrisShape";
+import { TetrisShape, L_SHAPE, SQUARE_SHAPE, STUPID_SHAPE, PENIS_SHAPE, GODS_SHAPE, SHAPES } from "./TetrisShape";
 export class Game {
 
   public canvas: Canvas;
@@ -11,18 +11,23 @@ export class Game {
   public shapes: TetrisShape[];
   public isShapeDown: boolean;
   public currentShape: TetrisShape;
+  public timer: number;
+  public date: Date;
 
   constructor(canvas: Canvas) {
     this.canvas = canvas;
     this.tetrisShapes = []
     this.isShapeDown = true;
     this.currentShape = null;
+    this.timer = -Infinity;
+    this.date = new Date();
   }
 
 
   paint = () => {
     const canvas = this.canvas;
     const map = this.canvas.map;
+    console.log(this.date.getTime().toString())
     canvas.clearScreen();
     canvas.drawTextWhere(`pountso${player.points}`, canvas.width - 100, 10)
     canvas.drawMap()
@@ -35,31 +40,12 @@ export class Game {
   }
 
   update = () => {
-    const map = this.canvas.map
-
-    if (this.currentShape) {
-      this.goDown()
-    }
-
-    this.deltaTime = deltaTime(this.deltaTime);
-
 
     if (this.currentShape === null) {
       this.currentShape = this.generateRandomShape()
     }
-
+    const map = this.canvas.map
     const { shapeMatrix, worldRow, worldCol } = this.currentShape;
-
-    if (player.DOWN) {
-      player.DOWN = false;
-      this.instantDown()
-      this.updateWorld()
-      this.currentShape = null;
-    }
-
-    if (!this.currentShape) {
-      return;
-    }
 
     if (player.LEFT) {
       const collides = this.currentShape.isColliding(shapeMatrix, map, worldRow, worldCol - 1)
@@ -102,6 +88,18 @@ export class Game {
       player.ROTATE = false
     }
 
+    if (this.currentShape) {
+      this.goDown()
+    }
+
+    this.deltaTime = deltaTime(this.deltaTime);
+
+    if (player.DOWN) {
+      player.DOWN = false;
+      this.instantDown()
+      this.updateWorld()
+      this.currentShape = null;
+    }
   }
 
   // we leave this here because he is a friend :D
@@ -132,6 +130,11 @@ export class Game {
   }
 
   goDown() {
+    const date = new Date();
+    if (this.timer == -Infinity) {
+      this.timer = date.getTime()
+    }
+
     const vertices = this.currentShape.vertices;
     const map = this.canvas.map
     const currRow = this.currentShape.worldRow;
@@ -152,7 +155,13 @@ export class Game {
         break;
       }
     }
+
     if (!increment) {
+      const time = date.getTime() - this.timer
+      if (time < 5000) {
+        return;
+      }
+      this.timer = -Infinity
       this.updateWorld()
       this.currentShape = null;
       return;
@@ -166,9 +175,13 @@ export class Game {
 
   // caveman afff
   generateRandomShape(): TetrisShape {
+    console.log(SHAPES[0])
     let shape: TetrisShape;
-    const whichShape = 3;
+    const whichShape = this.nRandom(SHAPES.length);
+    console.log(whichShape)
+    // const whichShape = 1;
     const color = COLORS[whichShape + 2]
+    return new TetrisShape(0, 0, SHAPES[whichShape], color, whichShape + 2)
     switch (whichShape) {
       case 0:
         shape = new TetrisShape(0, 0, STUPID_SHAPE, color, 2)
@@ -203,7 +216,6 @@ export class Game {
       }
     }
 
-    // la base pues la mandamos a la ergg
     let colsFilled = 0;
     let rowsFilled = 0;
     const rowsToRemove = []

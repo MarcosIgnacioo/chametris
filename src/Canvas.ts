@@ -93,9 +93,12 @@ export class Canvas {
     }
     const map = this.map
     const shadow: TetrisShape = { ...currentShape } as TetrisShape
-    shadow.color = COLORS[7]
+    shadow.color = COLORS[COLORS.length - 2]
     this.drawTetrisShape(currentShape);
     shadow.worldRow = currentShape.getLowestRow(map) - 1
+    if (shadow.worldRow == currentShape.worldRow) {
+      shadow.color = COLORS[COLORS.length - 1]
+    }
     this.drawTetrisShape(shadow);
   }
 
