@@ -148,8 +148,7 @@ export class TetrisShape {
     // this.shapeRightVertices()
   }
 
-  checkCollision(map: number[][], wR: number, wC: number): boolean {
-    const m = this.shapeMatrix;
+  isColliding(m: number[][], map: number[][], wR: number, wC: number): boolean {
     for (let row = 0, wwR = wR; row < m.length; row++, wwR++) {
       for (let col = 0, wwC = wC; col < m[0].length; col++, wwC++) {
         if (m[row][col] == 1 && map[wwR][wwC] == 1) {
@@ -159,10 +158,11 @@ export class TetrisShape {
     }
   }
 
-  rotate() {
-    const matrix = this.shapeMatrix;
+  rotate(map: number[][]) {
+    const matrix = this.shapeMatrix.map(function(arr) {
+      return arr.slice();
+    });
     const N = matrix.length;
-
     for (let i = 0; i < N; ++i) {
       for (let j = 0; j < i; ++j) {
         let temp = matrix[i][j];
@@ -178,57 +178,10 @@ export class TetrisShape {
         matrix[i][N - j - 1] = temp;
       }
     }
-
-    // let maxRows = 0;
-    // for (let i = 0; i < N; ++i) {
-    //   for (let j = 0; j < matrix[0].length; ++j) {
-    //     if (matrix[i][j] == 1) {
-    //       maxRows++;
-    //       break;
-    //     }
-    //   }
-    // }
-    //
-    // this.height = maxRows;
-    //
-    // // let mstr = ""
-    //
-    // let maxCols = 0;
-    //
-    // const cols: number[] = [];
-    // for (let i = 0; i < matrix[0].length; i++) {
-    //   cols.push(0)
-    // }
-    //
-    // for (let i = 0; i < matrix.length; i++) {
-    //   for (let j = 0; j < matrix[0].length; j++) {
-    //     if (matrix[i][j] == 1) {
-    //       cols[j] = 1
-    //     }
-    //   }
-    // }
-    //
-    // this.width = cols.filter(n => n > 0).length;
-    //
-    // let startRow: number = Infinity;
-    // let startCol: number = Infinity;
-    //
-    // for (let i = 0; i < N; ++i) {
-    //   for (let j = 0; j < matrix[0].length; ++j) {
-    //     if (matrix[i][j] == 1) {
-    //       if (i < startRow) {
-    //         startRow = i
-    //       }
-    //       if (j < startCol) {
-    //         startCol = j
-    //       }
-    //     }
-    //   }
-    // }
-    //
-    // this.startRow = startRow;
-    // this.startCol = startCol;
-
+    if (this.isColliding(matrix, map, this.worldRow, this.worldCol)) {
+      return;
+    }
+    this.shapeMatrix = matrix;
     this.initShape()
   }
 

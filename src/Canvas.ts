@@ -35,7 +35,7 @@ export class Canvas {
       for (let col = 0; col < this.totalCols; col++) {
         if (row == this.totalRows - 1) {
           cols.push(1)
-        } else if (row % 2 == 1 && col % 2 == 1 && col < 8) {
+        } else if (row % 2 == 1 && col % 2 == 1 && (col < 8 || col >= 20)) {
           cols.push(1);
         } else {
           cols.push(0);

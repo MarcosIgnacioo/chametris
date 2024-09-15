@@ -68,16 +68,22 @@ export class Game {
 
   update = () => {
 
-    // if (this.currentShape) {
-    //   this.goDown()
-    // }
+    if (this.currentShape) {
+      this.goDown()
+    }
 
+    const map = this.canvas.map
     if (this.deltaTime < 15) {
       this.deltaTime++
     } else {
       this.deltaTime = 0;
     }
 
+    if (this.currentShape === null) {
+      this.currentShape = this.generateRandomShape()
+    }
+
+    const { shapeMatrix, worldRow, worldCol } = this.currentShape;
     if (player.DOWN) {
       player.DOWN = false;
       this.instantDown()
@@ -86,54 +92,42 @@ export class Game {
     }
 
     if (player.LEFT && this.currentShape) {
-      console.log(this.currentShape.worldRow)
-      console.log(this.currentShape.worldCol)
-      const m = this.currentShape.shapeMatrix
-      let wR = this.currentShape.worldRow
-      const map = this.canvas.map
-      let wC = this.currentShape.worldCol
-      const collides = this.currentShape.checkCollision(map, this.currentShape.worldRow, this.currentShape.worldCol - 1)
+      const collides = this.currentShape.isColliding(shapeMatrix, map, worldRow, worldCol - 1)
       if (!collides) {
         this.currentShape.worldCol -= 1;
       }
-      let cols = ""
-      // const death = []
-      // for (let row = 0, wwR = wR; row < m.length; row++, wwR++) {
-      //   for (let col = 0, wwC = wC; col < m[0].length; col++, wwC++) {
-      //     death.push({ wwR, wwC })
-      //     if (m[row][col] == 1) {
-      //       if (map[wwR][wwC] == 1) {
-      //         this.currentShape.worldCol += 1;
-      //       }
-      //     }
-      //   }
-      // }
       player.LEFT = false
     }
 
     if (player.RIGHT && this.currentShape) {
-      this.currentShape.worldCol += 1;
+      const collides = this.currentShape.isColliding(shapeMatrix, map, worldRow, worldCol + 1)
+      if (!collides) {
+        this.currentShape.worldCol += 1;
+      }
       player.RIGHT = false
     }
 
     if (player.UP && this.currentShape) {
-      this.currentShape.worldRow -= 1;
+      const collides = this.currentShape.isColliding(shapeMatrix, map, worldRow - 1, worldCol)
+      if (!collides) {
+        this.currentShape.worldRow -= 1;
+      }
       player.UP = false
     }
 
     if (player.DOWNa && this.currentShape) {
-      this.currentShape.worldRow += 1;
+      const collides = this.currentShape.isColliding(shapeMatrix, map, worldRow + 1, worldCol)
+      if (!collides) {
+        this.currentShape.worldRow += 1;
+      }
       player.DOWNa = false
     }
 
     if (player.ROTATE && this.currentShape) {
-      this.currentShape.rotate()
+      this.currentShape.rotate(map)
       player.ROTATE = false
     }
 
-    if (this.currentShape === null) {
-      this.currentShape = this.generateRandomShape()
-    }
 
 
   }
