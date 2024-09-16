@@ -1,3 +1,5 @@
-export default {
-  base: `/chametris/`,
-}
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  base: `/chametris`,
+})
