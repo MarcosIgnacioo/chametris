@@ -1,6 +1,6 @@
 import { Canvas } from "./Canvas";
 import { c_is_better, c_is_better2, deltaTime, localToWorld, localToWorldle } from "./Functions";
-import { canvas, COLORS, GRAVITY, player, SQUARE_SIZE } from "./Globals";
+import { canvas, COLORS, GRAVITY, player, SHAPE_COL_ORIGIN, SHAPE_ROW_ORIGIN, SQUARE_SIZE } from "./Globals";
 import { TetrisShape, L_SHAPE, SQUARE_SHAPE, STUPID_SHAPE, PENIS_SHAPE, GODS_SHAPE, SHAPES } from "./TetrisShape";
 export class Game {
 
@@ -8,16 +8,21 @@ export class Game {
   public deltaTime: number;
   public isPlacing: boolean;
   public tetrisShapes: TetrisShape[];
+  public holdedShapes: TetrisShape[];
   public shapes: TetrisShape[];
   public isShapeDown: boolean;
   public currentShape: TetrisShape;
   public timer: number;
   public date: Date;
+  public hasHoldedThisTurn: boolean;
+  public hasLoadedHoldThisTurn: boolean;
 
   constructor(canvas: Canvas) {
     this.canvas = canvas;
     this.tetrisShapes = []
+    this.holdedShapes = []
     this.isShapeDown = true;
+    this.hasLoadedHoldThisTurn = false;
     this.currentShape = null;
     this.timer = -Infinity;
     this.date = new Date();
@@ -27,10 +32,10 @@ export class Game {
   paint = () => {
     const canvas = this.canvas;
     const map = this.canvas.map;
-    console.log(this.date.getTime().toString())
     canvas.clearScreen();
     canvas.drawTextWhere(`pountso${player.points}`, canvas.width - 100, 10)
     canvas.drawMap()
+    canvas.drawTetrisShape(this.peekShape())
     canvas.drawFallingPieceAndShadow(this.currentShape)
     canvas.debug()
     if (!player.PAUSE) {
@@ -42,8 +47,11 @@ export class Game {
   update = () => {
 
     if (this.currentShape === null) {
-      this.currentShape = this.generateRandomShape()
+      this.currentShape = this.popShape();
+      this.hasHoldedThisTurn = false;
+      this.hasLoadedHoldThisTurn = false;
     }
+
     const map = this.canvas.map
     const { shapeMatrix, worldRow, worldCol } = this.currentShape;
 
@@ -65,6 +73,20 @@ export class Game {
       if (this.deltaTime < 15) {
         player.RIGHT = false
       }
+    }
+
+    if (player.HOLD && !this.hasHoldedThisTurn) {
+      this.pushHoldedShape(this.currentShape)
+      this.hasHoldedThisTurn = true;
+      this.currentShape = this.popShape();
+      player.HOLD = false;
+    }
+
+    if (player.LOAD_HOLD && !this.hasHoldedThisTurn) {
+      this.currentShape = this.popHoldedShape()
+      this.hasHoldedThisTurn = false;
+      this.hasLoadedHoldThisTurn = true;
+      player.LOAD_HOLD = false;
     }
 
     if (player.UP) {
@@ -156,9 +178,10 @@ export class Game {
       }
     }
 
+    // CAVEMAN
     if (!increment) {
       const time = date.getTime() - this.timer
-      if (time < 5000) {
+      if (time < 1500) {
         return;
       }
       this.timer = -Infinity
@@ -166,6 +189,7 @@ export class Game {
       this.currentShape = null;
       return;
     } else if (this.deltaTime == 0) {
+      this.timer = -Infinity
       this.currentShape.worldRow++
     }
 
@@ -173,34 +197,59 @@ export class Game {
 
 
 
+  popShape(): TetrisShape {
+    if (!this.tetrisShapes.length) {
+      this.fillShapesArray();
+    }
+    const poppedShape = this.tetrisShapes.pop()
+    poppedShape.worldRow = SHAPE_ROW_ORIGIN
+    poppedShape.worldCol = (SHAPE_COL_ORIGIN - poppedShape.startCol)
+    return poppedShape
+  }
+
+  peekShape(): TetrisShape {
+    if (!this.tetrisShapes.length) {
+      this.fillShapesArray();
+    }
+    return this.tetrisShapes[this.tetrisShapes.length - 1]
+  }
+
+  pushHoldedShape(holdingShape: TetrisShape): void {
+    console.log(this.hasHoldedThisTurn)
+    if (this.hasHoldedThisTurn || this.holdedShapes.length > 10) {
+      return
+    }
+    this.holdedShapes.push(holdingShape)
+  }
+
+  popHoldedShape(): TetrisShape {
+    if (!this.holdedShapes.length) {
+      return this.currentShape;
+    }
+    const poppedShape = this.holdedShapes.pop()
+    poppedShape.worldRow = SHAPE_ROW_ORIGIN
+    poppedShape.worldCol = (SHAPE_COL_ORIGIN - poppedShape.startCol)
+    return poppedShape;
+  }
+
   // caveman afff
   generateRandomShape(): TetrisShape {
-    console.log(SHAPES[0])
-    let shape: TetrisShape;
+    // const whichShape = 4;
     const whichShape = this.nRandom(SHAPES.length);
-    console.log(whichShape)
-    // const whichShape = 1;
     const color = COLORS[whichShape + 2]
     return new TetrisShape(0, 0, SHAPES[whichShape], color, whichShape + 2)
-    switch (whichShape) {
-      case 0:
-        shape = new TetrisShape(0, 0, STUPID_SHAPE, color, 2)
-        break;
-      case 1:
-        shape = new TetrisShape(0, 0, GODS_SHAPE, color, 3)
-        break;
-      case 2:
-        shape = new TetrisShape(0, 0, PENIS_SHAPE, color, 4)
-        break;
-      case 3:
-        shape = new TetrisShape(0, 0, SQUARE_SHAPE, color, 5)
-        break;
-      case 4:
-        shape = new TetrisShape(0, 0, L_SHAPE, color, 6)
-        break;
-    }
-    return shape
   }
+
+  fillShapesArray(): void {
+    for (let i = 0; i < 5; i++) {
+      const newShape = this.generateRandomShape()
+      newShape.worldCol = 17 - newShape.startCol + newShape.shapeMatrix.length / 2
+      newShape.worldRow = 3;
+      this.tetrisShapes.unshift(newShape);
+    }
+  }
+
+
 
 
   updateWorld() {
@@ -216,25 +265,29 @@ export class Game {
       }
     }
 
-    let colsFilled = 0;
     let rowsFilled = 0;
+    let colsFilled = 0;
     const rowsToRemove = []
     for (let row = 0; row < worldMap.length - 1; row++) {
+      colsFilled = 0
       for (let col = 0; col < worldMap[0].length; col++) {
         if (worldMap[row][col] > 1) {
           colsFilled++
         }
-        if (colsFilled >= worldMap[0].length) {
-          worldMap[row].fill(0);
-        }
       }
+
       if (colsFilled < worldMap[0].length) {
         colsFilled = 0;
         continue;
       }
+
+      if (colsFilled >= worldMap[0].length) {
+        worldMap[row].fill(0);
+      }
       rowsFilled++;
       rowsToRemove.push(row)
     }
+
 
     if (!rowsToRemove.length) {
       return;
@@ -285,39 +338,4 @@ export class Game {
     return row - 1
   }
 
-
-  PAIN(tetrisShape: TetrisShape, pivotRow: number): number {
-
-    const map = this.canvas.map
-    let mstr = ""
-    let mstr2 = ""
-    let possibleRows = []
-    const { width, height, shapeMatrix, startRow, startCol } = this.currentShape;
-
-    for (let ROW = 0; ROW < map.length; ROW++) {
-      for (
-        let localRow = startRow, worldRow = ROW;
-        localRow < startRow + height;
-        localRow++, worldRow++) {
-        for (
-          let localCol = startCol, { worldCol } = tetrisShape;
-          localCol < startCol + width;
-          localCol++, worldCol++
-        ) {
-
-          if ((map[worldRow] !== undefined) && map[worldRow][worldCol] == 1) {
-            possibleRows.push(worldRow)
-            localRow = Infinity
-            localCol = Infinity
-          }
-        }
-      }
-    }
-
-    return -1
-  }
-
 }
-
-
-// shapeCol + this.currentShape.shapeMatrix[0].length

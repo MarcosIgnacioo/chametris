@@ -42,6 +42,12 @@ document.addEventListener("keydown", (e) => {
     case " ":
       player.DOWN = true;
       break;
+    case "q":
+      player.HOLD = true;
+      break;
+    case "e":
+      player.LOAD_HOLD = true;
+      break;
     case "Escape":
       player.PAUSE = !player.PAUSE;
       break;
@@ -53,6 +59,12 @@ document.addEventListener("keyup", (e) => {
   var currentdate = new Date();
   player.MS_SINCE_REALESED = currentdate.getTime()
   switch (e.key) {
+    case "q":
+      player.HOLD = false;
+      break;
+    case "e":
+      player.LOAD_HOLD = false;
+      break;
     case "w":
     case "k":
       player.UP = false;

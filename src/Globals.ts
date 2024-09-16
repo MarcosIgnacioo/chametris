@@ -2,6 +2,10 @@ import { Canvas } from "./Canvas";
 
 export const SQUARE_SIZE: number = 24;
 export const GRAVITY: number = 0.3;
+export const TOTAL_COLS: number = 16;
+export const TOTAL_ROWS: number = 24;
+export const SHAPE_ROW_ORIGIN = 0;
+export const SHAPE_COL_ORIGIN = TOTAL_COLS / 2;
 export const player = {
   LEFT: false,
   RIGHT: false,
@@ -11,6 +15,8 @@ export const player = {
   ROTATE: false,
   PAUSE: false,
   MOVING: false,
+  HOLD: false,
+  LOAD_HOLD: false,
   MS_SINCE_LAST_PRESSED: -Infinity,
   MS_SINCE_REALESED: -Infinity,
   LAST_PRESSED_TIME: -Infinity,

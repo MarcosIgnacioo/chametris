@@ -196,11 +196,12 @@ export class TetrisShape {
         matrix[i][N - j - 1] = temp;
       }
     }
-    if (this.isColliding(matrix, map, this.worldRow, this.worldCol)) {
-      return;
-    }
     this.shapeMatrix = matrix;
     this.initShape()
+    if (this.isColliding(matrix, map, this.worldRow, this.worldCol)) {
+      this.rotate(map)
+      return;
+    }
   }
 
 

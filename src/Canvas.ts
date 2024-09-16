@@ -1,5 +1,5 @@
 import { c_is_better2 } from "./Functions";
-import { COLORS, SQUARE_SIZE } from "./Globals";
+import { COLORS, SQUARE_SIZE, TOTAL_COLS, TOTAL_ROWS } from "./Globals";
 import { TetrisShape } from "./TetrisShape";
 
 export class Canvas {
@@ -22,8 +22,8 @@ export class Canvas {
     this.context.imageSmoothingEnabled = false;
     this.width = canvas.width;
     this.height = canvas.height;
-    this.totalRows = 24;
-    this.totalCols = 16;
+    this.totalRows = TOTAL_ROWS;
+    this.totalCols = TOTAL_COLS;
     this.worldOriginX = this.width / 2 + this.totalCols / 2 * SQUARE_SIZE;
     this.worldOriginY = this.height / 2 + this.totalRows / 2 * SQUARE_SIZE;
     this.map = [];
