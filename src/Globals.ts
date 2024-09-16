@@ -3,9 +3,10 @@ import { Canvas } from "./Canvas";
 export const SQUARE_SIZE: number = 24;
 export const GRAVITY: number = 0.3;
 export const TOTAL_COLS: number = 16;
-export const TOTAL_ROWS: number = 24;
+export const TOTAL_ROWS: number = 36;
 export const SHAPE_ROW_ORIGIN = 0;
 export const SHAPE_COL_ORIGIN = TOTAL_COLS / 2;
+export const GAME_SPEED = 0;
 export const player = {
   LEFT: false,
   RIGHT: false,

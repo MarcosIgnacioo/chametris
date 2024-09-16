@@ -1,6 +1,6 @@
 import { Canvas } from "./Canvas";
 import { c_is_better, c_is_better2, deltaTime, localToWorld, localToWorldle } from "./Functions";
-import { canvas, COLORS, GRAVITY, player, SHAPE_COL_ORIGIN, SHAPE_ROW_ORIGIN, SQUARE_SIZE } from "./Globals";
+import { canvas, COLORS, GAME_SPEED, GRAVITY, player, SHAPE_COL_ORIGIN, SHAPE_ROW_ORIGIN, SQUARE_SIZE } from "./Globals";
 import { TetrisShape, L_SHAPE, SQUARE_SHAPE, STUPID_SHAPE, PENIS_SHAPE, GODS_SHAPE, SHAPES } from "./TetrisShape";
 export class Game {
 
@@ -13,7 +13,10 @@ export class Game {
   public isShapeDown: boolean;
   public currentShape: TetrisShape;
   public timer: number;
+  public gameTime: number;
+  public gameSpeed: number;
   public date: Date;
+  public timeReset: number;
   public hasHoldedThisTurn: boolean;
   public hasLoadedHoldThisTurn: boolean;
 
@@ -26,16 +29,33 @@ export class Game {
     this.currentShape = null;
     this.timer = -Infinity;
     this.date = new Date();
+    this.timeReset = this.date.getMinutes()
+    this.gameSpeed = GAME_SPEED;
   }
 
+
+  updateClock() {
+    const date = new Date()
+    const timeReset = this.date.getMinutes() * 60 + this.date.getSeconds()
+    const timeNow = date.getMinutes() * 60 + date.getSeconds()
+    console.log(timeNow - timeReset)
+    if (timeNow - timeReset == 180) {
+      this.date = date;
+      this.gameSpeed++;
+    }
+  }
 
   paint = () => {
     const canvas = this.canvas;
     const map = this.canvas.map;
+    this.updateClock();
     canvas.clearScreen();
     canvas.drawTextWhere(`pountso${player.points}`, canvas.width - 100, 10)
     canvas.drawMap()
     canvas.drawTetrisShape(this.peekShape())
+    if (this.peekHoldedShape()) {
+      canvas.drawTetrisShape(this.peekHoldedShape())
+    }
     canvas.drawFallingPieceAndShadow(this.currentShape)
     canvas.debug()
     if (!player.PAUSE) {
@@ -43,6 +63,8 @@ export class Game {
     }
     requestAnimationFrame(this.paint)
   }
+
+  // oracle db flag state pro gamer strategy
 
   update = () => {
 
@@ -118,6 +140,9 @@ export class Game {
 
     if (player.DOWN) {
       player.DOWN = false;
+      const audio = new Audio();
+      audio.src = "./placing_sound_effect_2.mp3"
+      audio.play()
       this.instantDown()
       this.updateWorld()
       this.currentShape = null;
@@ -188,7 +213,7 @@ export class Game {
       this.updateWorld()
       this.currentShape = null;
       return;
-    } else if (this.deltaTime == 0) {
+    } else if (this.deltaTime <= this.gameSpeed || this.deltaTime == 0) {
       this.timer = -Infinity
       this.currentShape.worldRow++
     }
@@ -212,13 +237,22 @@ export class Game {
       this.fillShapesArray();
     }
     return this.tetrisShapes[this.tetrisShapes.length - 1]
+
+  }
+
+  peekHoldedShape(): TetrisShape {
+    if (!this.holdedShapes.length) {
+      return null;
+    }
+    return this.holdedShapes[this.holdedShapes.length - 1]
   }
 
   pushHoldedShape(holdingShape: TetrisShape): void {
-    console.log(this.hasHoldedThisTurn)
     if (this.hasHoldedThisTurn || this.holdedShapes.length > 10) {
       return
     }
+    holdingShape.worldRow = 6
+    holdingShape.worldCol = 17 - holdingShape.startCol + holdingShape.shapeMatrix.length / 2
     this.holdedShapes.push(holdingShape)
   }
 
@@ -315,6 +349,10 @@ export class Game {
         }
       }
     }
+
+    const audio = new Audio();
+    audio.src = "./clear_multiple_lines.mp3"
+    audio.play()
   }
 
 

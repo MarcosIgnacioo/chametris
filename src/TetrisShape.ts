@@ -40,8 +40,10 @@ export const PENIS_SHAPE: number[][] = [
 ]
 
 export const SQUARE_SHAPE: number[][] = [
-  [1, 1],
-  [1, 1],
+  [0, 0, 0, 0],
+  [0, 1, 1, 0],
+  [0, 1, 1, 0],
+  [0, 0, 0, 0],
 ]
 
 export const GODS_SHAPE: number[][] = [
