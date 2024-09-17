@@ -54,13 +54,13 @@ export const GODS_SHAPE: number[][] = [
 ]
 
 export const SHAPES: number[][][] = [];
-SHAPES.push(GODS_SHAPE);
-SHAPES.push(L_SHAPE);
-SHAPES.push(L_SHAPE_REVERSED);
-SHAPES.push(STUPID_SHAPE);
-SHAPES.push(STUPID_SHAPE_REVERSED);
-SHAPES.push(SQUARE_SHAPE);
-SHAPES.push(PENIS_SHAPE);
+SHAPES.push(GODS_SHAPE); // 0
+SHAPES.push(L_SHAPE);//  1
+SHAPES.push(L_SHAPE_REVERSED); // 2
+SHAPES.push(STUPID_SHAPE); // 3
+SHAPES.push(STUPID_SHAPE_REVERSED); // 4
+SHAPES.push(SQUARE_SHAPE);// 5
+SHAPES.push(PENIS_SHAPE);// 6
 
 export class TetrisShape {
 
@@ -73,6 +73,7 @@ export class TetrisShape {
   public startRow: number;
   public startCol: number;
   public shapeNumber: number;
+  public textureSrc: string;
   public vertices: Vertices[];
   public leftVertices: Vertices[];
   public rightVertices: Vertices[];
@@ -84,7 +85,7 @@ export class TetrisShape {
   public gravity: number;
 
 
-  constructor(x: number, y: number, shapeMatrix: number[][], color: string, shapeNumber: number) {
+  constructor(x: number, y: number, shapeMatrix: number[][], color: string, shapeNumber: number, textureSrc: string = "") {
     this.x = x;
     this.y = y;
     this.worldRow = 0
@@ -92,6 +93,7 @@ export class TetrisShape {
     this.shapeMatrix = shapeMatrix;
     this.color = color;
     this.shapeNumber = shapeNumber
+    this.textureSrc = textureSrc
     this.initShape();
   }
 
@@ -169,6 +171,9 @@ export class TetrisShape {
 
   getLowestRow(map: number[][]) {
     const shapeMatrix = this.shapeMatrix
+    if (!shapeMatrix) {
+      return;
+    }
     let row = this.worldRow
     for (; row < map.length; row++) {
       if (this.isColliding(shapeMatrix, map, row, this.worldCol)) {

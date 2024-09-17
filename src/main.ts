@@ -1,43 +1,36 @@
 import { Game } from './Game'
-import { canvas, player } from './Globals'
+import { canvas, DOWN_KEY, DOWN_KEY_VIM, LEFT_KEY, LEFT_KEY_VIM, player, RIGHT_KEY, RIGHT_KEY_VIM } from './Globals'
 import './index.css'
 
 const game: Game = new Game(canvas);
 
+export var music = new Audio('bob.mp3');
+music.addEventListener('ended', function() {
+  this.currentTime = 0;
+  this.play();
+}, false);
+
 document.addEventListener("keydown", (e) => {
-  var currentdate = new Date();
-  if (player.LAST_PRESSED_TIME == -Infinity) {
-    player.LAST_PRESSED_TIME = currentdate.getTime()
-  }
   switch (e.key) {
-    case "w":
-    case "k":
-      player.UP = true;
-      break;
-    case "j":
+    case game.downKey:
+    case DOWN_KEY_VIM:
       player.DOWNa = true;
       player.MOVING = true;
       break;
-    case "l":
-    case "d":
+    case game.rightKey:
+    case RIGHT_KEY_VIM:
       player.RIGHT = true;
       player.MOVING = true;
-      player.MS_SINCE_LAST_PRESSED = currentdate.getTime() - player.LAST_PRESSED_TIME
-      player.LAST_PRESSED_TIME = currentdate.getTime()
       break;
-    case "a":
-    case "h":
+    case game.leftKey:
+    case LEFT_KEY_VIM:
       player.MOVING = true;
       player.LEFT = true;
 
-      player.MS_SINCE_LAST_PRESSED = currentdate.getTime() - player.LAST_PRESSED_TIME
-      player.LAST_PRESSED_TIME = currentdate.getTime()
       break;
     case "r":
       player.ROTATE = true;
       player.MOVING = true;
-      player.MS_SINCE_LAST_PRESSED = currentdate.getTime() - player.LAST_PRESSED_TIME
-      player.LAST_PRESSED_TIME = currentdate.getTime()
       break;
     case " ":
       player.DOWN = true;
@@ -49,7 +42,15 @@ document.addEventListener("keydown", (e) => {
       player.LOAD_HOLD = true;
       break;
     case "Escape":
+      music.pause();
+      music.play();
       player.PAUSE = !player.PAUSE;
+      break;
+    case "Enter":
+      player.ENTER = true;
+      music.volume = 0.2;
+      music.pause();
+      music.play();
       break;
   }
   // console.log(player.MS_SINCE_LAST_PRESSED)
@@ -65,19 +66,16 @@ document.addEventListener("keyup", (e) => {
     case "e":
       player.LOAD_HOLD = false;
       break;
-    case "w":
-    case "k":
-      player.UP = false;
-      break;
-    case "j":
+    case game.downKey:
+    case DOWN_KEY_VIM:
       player.DOWNa = false;
       break;
-    case "l":
-    case "d":
+    case game.rightKey:
+    case RIGHT_KEY_VIM:
       player.RIGHT = false;
       break;
-    case "a":
-    case "h":
+    case game.leftKey:
+    case LEFT_KEY_VIM:
       player.LEFT = false;
       break;
     case "r":
@@ -90,3 +88,4 @@ document.addEventListener("keyup", (e) => {
 });
 
 requestAnimationFrame(game.paint)
+

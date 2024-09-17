@@ -1,6 +1,7 @@
 import { Canvas } from "./Canvas";
-import { c_is_better, c_is_better2, deltaTime, localToWorld, localToWorldle } from "./Functions";
-import { canvas, COLORS, GAME_SPEED, GRAVITY, player, SHAPE_COL_ORIGIN, SHAPE_ROW_ORIGIN, SQUARE_SIZE } from "./Globals";
+import { c_is_better, c_is_better2, deltaTime, localToWorld, localToWorldle, rgb } from "./Functions";
+import { canvas, COLORS, DOWN_KEY, GAME_SPEED, GRAVITY, htmlCanvas, LEFT_KEY, overlay, player, reverseControls, RIGHT_KEY, SHAPE_COL_ORIGIN, SHAPE_ROW_ORIGIN, SQUARE_SIZE, TEXTURES } from "./Globals";
+import { music } from "./main";
 import { TetrisShape, L_SHAPE, SQUARE_SHAPE, STUPID_SHAPE, PENIS_SHAPE, GODS_SHAPE, SHAPES } from "./TetrisShape";
 export class Game {
 
@@ -14,11 +15,20 @@ export class Game {
   public currentShape: TetrisShape;
   public timer: number;
   public gameTime: number;
+  public currentTime: number;
   public gameSpeed: number;
   public date: Date;
   public timeReset: number;
   public hasHoldedThisTurn: boolean;
   public hasLoadedHoldThisTurn: boolean;
+  public leftKey: string;
+  public rightKey: string;
+  public downKey: string;
+  public initialDate: Date;
+  public rowBarrierCount: number;
+  public reversingProbability: number;
+  public dateSinceFlipped: Date;
+  public isReversed: boolean;
 
   constructor(canvas: Canvas) {
     this.canvas = canvas;
@@ -28,46 +38,121 @@ export class Game {
     this.hasLoadedHoldThisTurn = false;
     this.currentShape = null;
     this.timer = -Infinity;
+    this.initialDate = new Date();
     this.date = new Date();
     this.timeReset = this.date.getMinutes()
     this.gameSpeed = GAME_SPEED;
+    this.leftKey = LEFT_KEY
+    this.rowBarrierCount = 1;
+    this.reversingProbability = 500;
+    this.rightKey = RIGHT_KEY
+    this.downKey = DOWN_KEY
   }
+
+  getTime() {
+    const date = new Date()
+    const initialTime = this.initialDate.getMinutes() * 60 + this.initialDate.getSeconds()
+    const timeNow = date.getMinutes() * 60 + date.getSeconds()
+    let seconds = timeNow - initialTime;
+    const minutesFromSeconds = seconds / 60;
+    let minutes: number = 0;
+    if (minutesFromSeconds > 1) {
+      minutes += Math.trunc(minutesFromSeconds)
+      seconds = seconds % 60;
+    }
+    console.log("wep")
+    return this.stringifyTime(minutes, seconds)
+  }
+  stringifyTime(minutes: number, seconds: number) {
+    return `${(minutes > 9) ? minutes : '0' + minutes}:${(seconds > 9) ? seconds : '0' + seconds}`
+  }
+
 
 
   updateClock() {
     const date = new Date()
     const timeReset = this.date.getMinutes() * 60 + this.date.getSeconds()
     const timeNow = date.getMinutes() * 60 + date.getSeconds()
-    console.log(timeNow - timeReset)
+    const canvas = this.canvas;
     if (timeNow - timeReset == 180) {
       this.date = date;
       this.gameSpeed++;
+      this.rowBarrierCount++;
+      this.reversingProbability -= 10
+      canvas.updateBarrier(this.rowBarrierCount);
+    }
+
+    if (this.nRandom(this.reversingProbability) == 1 && !this.isReversed) {
+      this.leftKey = "d"
+      this.rightKey = "a"
+      this.downKey = "w"
+      htmlCanvas.style.rotate = "180deg"
+      this.dateSinceFlipped = new Date();
+      this.isReversed = true;
+    }
+
+    if (this.dateSinceFlipped != undefined && this.isReversed && date.getTime() - this.dateSinceFlipped.getTime() > 5000) {
+      htmlCanvas.style.rotate = "0deg"
+      this.leftKey = "a"
+      this.rightKey = "d"
+      this.downKey = "s"
+    }
+  }
+  manageLosingState() {
+    if (!player.LOSER) {
+      return
+    }
+    canvas.drawImage("loser.png", 4, 1);
+    overlay.style.transform = `scaleX(${Math.random()})`;
+    if (player.ENTER) {
+      window.location.reload();
+      player.ENTER = false;
     }
   }
 
   paint = () => {
     const canvas = this.canvas;
-    const map = this.canvas.map;
-    this.updateClock();
+    if (!player.START_GAME) {
+      canvas.drawImage("start.png", 0, -13);
+      overlay.style.transform = `scaleX(${Math.random()})`;
+      if (player.ENTER) {
+        player.START_GAME = true;
+        player.ENTER = false;
+      }
+      requestAnimationFrame(this.paint)
+      return;
+    }
+
+    if (!player.PAUSE && !player.LOSER) {
+      this.update()
+      this.updateClock();
+    }
+
+    const date = new Date()
     canvas.clearScreen();
-    canvas.drawTextWhere(`pountso${player.points}`, canvas.width - 100, 10)
+    canvas.drawTextWhere(`PUNTOS: ${player.points}`, canvas.width - 100, 20)
     canvas.drawMap()
+
+    canvas.drawTextWhere(`SIGIUENTE FIGURA`, canvas.worldOriginX + 17 * SQUARE_SIZE, 2 * SQUARE_SIZE)
+    canvas.drawTextWhere(this.getTime(), canvas.width - 100, 100)
     canvas.drawTetrisShape(this.peekShape())
     if (this.peekHoldedShape()) {
+      canvas.drawTextWhere(`GUARDADA`, canvas.worldOriginX + 17 * SQUARE_SIZE, 8 * SQUARE_SIZE)
       canvas.drawTetrisShape(this.peekHoldedShape())
     }
     canvas.drawFallingPieceAndShadow(this.currentShape)
-    canvas.debug()
-    if (!player.PAUSE) {
-      this.update()
+    this.manageLosingState()
+    if (player.PAUSE) {
+      this.canvas.drawRect(0, 0, this.canvas.width, this.canvas.height, "rgba(0,0,0,0.5)");
+      canvas.drawTextWhere(`PAUSA`, canvas.width / 2 - 20, canvas.height / 2)
     }
+    // canvas.debug()
     requestAnimationFrame(this.paint)
   }
 
   // oracle db flag state pro gamer strategy
 
   update = () => {
-
     if (this.currentShape === null) {
       this.currentShape = this.popShape();
       this.hasHoldedThisTurn = false;
@@ -75,6 +160,12 @@ export class Game {
     }
 
     const map = this.canvas.map
+
+    if (this.currentShape && this.currentShape.getLowestRow(map) - 1 === -1) {
+      console.log("LOSEERR")
+      player.LOSER = true;
+    }
+
     const { shapeMatrix, worldRow, worldCol } = this.currentShape;
 
     if (player.LEFT) {
@@ -141,6 +232,7 @@ export class Game {
     if (player.DOWN) {
       player.DOWN = false;
       const audio = new Audio();
+      audio.volume = 0.2;
       audio.src = "./placing_sound_effect_2.mp3"
       audio.play()
       this.instantDown()
@@ -210,6 +302,10 @@ export class Game {
         return;
       }
       this.timer = -Infinity
+      const audio = new Audio();
+      audio.src = "./placing_sound_effect_3.mp3"
+      audio.volume = 0.2;
+      audio.play()
       this.updateWorld()
       this.currentShape = null;
       return;
@@ -251,8 +347,8 @@ export class Game {
     if (this.hasHoldedThisTurn || this.holdedShapes.length > 10) {
       return
     }
-    holdingShape.worldRow = 6
-    holdingShape.worldCol = 17 - holdingShape.startCol + holdingShape.shapeMatrix.length / 2
+    holdingShape.worldRow = 9
+    holdingShape.worldCol = 17 - holdingShape.startCol
     this.holdedShapes.push(holdingShape)
   }
 
@@ -270,14 +366,16 @@ export class Game {
   generateRandomShape(): TetrisShape {
     // const whichShape = 4;
     const whichShape = this.nRandom(SHAPES.length);
+    // const whichShape = 4;
     const color = COLORS[whichShape + 2]
-    return new TetrisShape(0, 0, SHAPES[whichShape], color, whichShape + 2)
+    const img = TEXTURES[whichShape + 2]
+    return new TetrisShape(0, 0, SHAPES[whichShape], color, whichShape + 2, img)
   }
 
   fillShapesArray(): void {
     for (let i = 0; i < 5; i++) {
       const newShape = this.generateRandomShape()
-      newShape.worldCol = 17 - newShape.startCol + newShape.shapeMatrix.length / 2
+      newShape.worldCol = 17 - newShape.startCol
       newShape.worldRow = 3;
       this.tetrisShapes.unshift(newShape);
     }
@@ -351,6 +449,7 @@ export class Game {
     }
 
     const audio = new Audio();
+    audio.volume = 0.2;
     audio.src = "./clear_multiple_lines.mp3"
     audio.play()
   }
