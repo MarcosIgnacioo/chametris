@@ -130,11 +130,11 @@ export class Game {
 
     const date = new Date()
     canvas.clearScreen();
-    canvas.drawTextWhere(`PUNTOS: ${player.points}`, canvas.width - 100, 20)
     canvas.drawMap()
 
     canvas.drawTextWhere(`SIGIUENTE FIGURA`, canvas.worldOriginX + 17 * SQUARE_SIZE, 2 * SQUARE_SIZE)
     canvas.drawTextWhere(this.getTime(), canvas.width - 100, 100)
+    canvas.drawTextWhere(`PUNTOS: ${player.points}`, canvas.width - 200, 15, 16)
     canvas.drawTetrisShape(this.peekShape())
     if (this.peekHoldedShape()) {
       canvas.drawTextWhere(`GUARDADA`, canvas.worldOriginX + 17 * SQUARE_SIZE, 8 * SQUARE_SIZE)
