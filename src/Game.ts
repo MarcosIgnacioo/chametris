@@ -1,6 +1,6 @@
 import { Canvas } from "./Canvas";
 import { c_is_better, c_is_better2, deltaTime, localToWorld, localToWorldle, rgb } from "./Functions";
-import { canvas, COLORS, DOWN_KEY, GAME_SPEED, GRAVITY, htmlCanvas, LEFT_KEY, overlay, player, reverseControls, RIGHT_KEY, SHAPE_COL_ORIGIN, SHAPE_ROW_ORIGIN, SQUARE_SIZE, TEXTURES } from "./Globals";
+import { canvas, COLORS, DOWN_KEY, GAME_SPEED, GRAVITY, htmlCanvas, LEFT_KEY, overlay, player, RIGHT_KEY, SHAPE_COL_ORIGIN, SHAPE_ROW_ORIGIN, SQUARE_SIZE, TEXTURES } from "./Globals";
 import { music } from "./main";
 import { TetrisShape, L_SHAPE, SQUARE_SHAPE, STUPID_SHAPE, PENIS_SHAPE, GODS_SHAPE, SHAPES } from "./TetrisShape";
 export class Game {
